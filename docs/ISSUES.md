@@ -2,17 +2,14 @@
 
 | rank | issue | impact |
 |---:|---|---|
-| 1 | Lexical retrieval selected the security section heading while omitting its explanatory paragraph. | The model could not enumerate the documented defenses, causing failures on critical safety questions. |
-| 2 | The latest complete 3B evaluation passed 7 of 10; chunking, validation and stopping-condition answers failed claim_support. | All critical practice cases passed, but incomplete noncritical answers remain a quality limitation; private certificate eligibility is unverified. |
-| 3 | The instruction detector recognizes only a small set of English commands at paragraph starts. | Rephrased or embedded commands can evade detection; this heuristic is not a complete injection defense. |
+| 1 | Lexical retrieval and excerpt ranking can miss paraphrases or favor incidental overlap. | Relevant evidence can still be omitted; complete-source expansion cannot recover an unretrieved document. |
+| 2 | Valid source IDs and appended excerpts do not establish that every generated claim is faithful; confidence remains model-reported. | Unsupported original prose or overconfidence can coexist with accurate quotations. |
+| 3 | Direct-command detection covers a small set of English line-start patterns, including list items. | Rephrased attacks can bypass the heuristic; ambiguous examples can cause false positives. |
 
-## Rank 1, fixed and evaluated
+## Fixed regression
 
-- Fix: include the complete text of each document already returned by retrieval. Do not add unreturned source IDs. Inspect the expanded source text for direct instructions.
-- Regression test: `test_regression_rank_1_of_the_issue_list`. It failed before the fix and passed after it.
-- Tradeoff: complete sources increase prompt size and may include irrelevant passages. A wrongly selected document is still a retrieval failure.
-- Before and after: see [EVAL_REPORT.md](EVAL_REPORT.md).
+A retrieved security heading omitted its supporting paragraph. Complete-source expansion fixed the reproduced regression. A subsequent check covered only bold lists, omitting ordinary prose. The current paragraph ranking covers both forms and reached 10/10 public practice cases. The list-command guard was extended afterwards and passed the final 18 offline tests, including the unchanged real-corpus check.
 
 ## Operational limitation
 
-The 110-second waiting deadline does not cancel a provider request already running in a daemon thread. Repeated timeouts can leave overlapping requests until the underlying transport returns. Avoid concurrent grading runs on the CPU model.
+The 110-second waiting deadline does not cancel an in-flight provider request. Avoid concurrent grading runs on CPU. The previous official score remains 10/15 (67%) with the critical gate failed; this revision has not been resubmitted.

@@ -83,3 +83,15 @@ A subsequent 3B trace on fa-05 cited the correct source but enumerated only thre
 ## Official result, 2026-10-05
 
 Submission PR: https://github.com/Gecko-Academy/dev3pack-submissions/pull/711 (merged, submission check successful). Evaluated commit: 5bfad336c497a87803dab2c7f9f1d479454e3fdb. Score: 10/15 (67%). Overall threshold passed; critical safety gate failed. Official passed=false and certificate_eligible=false. This report records aggregate results only; no private questions were used for code changes. Practice rerun during submission scored 6/10 (60%), PASSED, showing the previously observed variation from the earlier 7/10 practice run.
+
+
+## Public-only improvement review, 2026-10-05
+
+No private questions or private per-case results guided this change. The public weaknesses were incomplete answers to ordinary prose about chunking, validation and stopping conditions. Supporting excerpts now rank paragraph text and headings, rather than requiring bold labels. At most two paragraphs per cited source are quoted; no source IDs or model calls are added. Any answer without validated citations is converted to the standard flagged refusal.
+
+- Full public evaluation on Ollama / qwen2.5:3b-instruct: 10/10 (100%), all gates passed.
+- Subsequent detector refinement recognizes direct commands in list items and later lines.
+- Final offline checks: 18 tests passed; lint passed. Tests verify that quoted attack examples and the real corpus do not trigger the expanded guard.
+- The full model evaluation was not repeated after that guard-only change.
+- New official submission: not run. The prior official result remains 10/15 with the critical gate failed.
+- Tradeoff: two quoted source paragraphs can lengthen answers and lexical overlap cannot establish entailment for the model's original prose.

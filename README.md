@@ -43,7 +43,7 @@ needs_human_review: True
 
 ## Architecture
 
-A bounded chain retrieves top_k=3 chunks, expands only their selected source documents, prioritizes sources whose complete title is explicitly named in the question, and asks one model through LLMClient for strict ResearchAnswer JSON. The course parser permits one corrective retry; both calls share a 110-second waiting budget. The application checks citation IDs and rejects answers when the expanded evidence matches its direct-instruction detector. When a cited list section matches the question and the answer omits its bold item labels, the application adds the source paragraph as a labeled excerpt without another model call. Empty retrieval spends zero model calls; provider failures and timeouts return typed refusals.
+A bounded chain retrieves top_k=3 chunks, expands only their selected source documents, prioritizes sources whose complete title is explicitly named in the question, and asks one model through LLMClient for strict ResearchAnswer JSON. The course parser permits one corrective retry; both calls share a 110-second waiting budget. The application checks citation IDs and rejects answers when the expanded evidence matches its direct-instruction detector. For cited sources, the application appends at most two relevant paragraphs ranked by question overlap with their text and section headings. This covers ordinary prose as well as lists without another model call. Responses without validated citations become typed refusals. Empty retrieval spends zero model calls; provider failures and timeouts return typed refusals.
 
 The chain has no persistent conversation memory, database, network search or writing tools. Ollama is the local model endpoint. See [the architecture decision](docs/adr/0001-run-shape.md), [retention](docs/RETENTION.md), and [workflow](docs/SKILL.md).
 
@@ -56,15 +56,16 @@ The chain has no persistent conversation memory, database, network search or wri
 | Complete-source expansion and stateless-memory test, 5b4df0d | `uv run pytest` | Offline scripted models | 9 passed |
 | Complete-source version, 5b4df0d | `uv run bootcamp final grade` | Same Ollama model | 6/10 (60%), critical gate failed |
 | Current coverage and refusal normalization | `uv run bootcamp final grade` | Ollama / qwen2.5:3b-instruct | 7/10 (70%), all critical cases passed |
-| Current contract checks | `uv run pytest` | Offline scripted models | 13 passed |
+| Evidence-coverage refinement | `uv run bootcamp final grade` | Ollama / qwen2.5:3b-instruct | 10/10 (100%), all critical cases passed |
+| Subsequent list-command guard and contract checks | `uv run pytest` | Offline scripted models | 18 passed |
 
 Practice results do not establish certificate eligibility. Only the course's private grading result does. Detailed measurements and evaluator limitations are in [EVAL_REPORT.md](docs/EVAL_REPORT.md).
 
 ## The honest limitation
 
-A lexical query selected a heading while omitting its supporting paragraph. Complete-source expansion fixes that reproduced failure, but cannot repair selection of the wrong document and increases context size. A subsequent full-source evaluation reached 6/10 but still failed the critical coverage question. The current 3B evaluation passed 7/10 and every critical case. Three noncritical questions still failed claim_support: chunking, application-owned validation and production stopping conditions. Passing practice does not guarantee the private certificate result.
+A lexical query selected a heading while omitting its supporting paragraph. Complete-source expansion fixes that reproduced failure, but cannot repair selection of the wrong document and increases context size. A subsequent full-source evaluation reached 6/10 but still failed the critical coverage question. The evidence-coverage refinement passed 10/10 public practice cases. A subsequent detector change passed 18 offline tests, including a check that none of the six real corpus documents trigger it; the full model evaluation was not repeated after that guard-only change. The previous official submission scored 10/15 (67%) and failed the critical gate. This improvement has not been officially resubmitted.
 
-The injection detector recognizes only a few English paragraph-start patterns. The caller timeout bounds waiting but does not cancel an in-flight provider request. See [ranked issues](docs/ISSUES.md).
+The injection detector recognizes a few English line-start commands, including list items. It remains a heuristic that can miss rephrased attacks or reject ambiguous examples. The caller timeout bounds waiting but does not cancel an in-flight provider request. See [ranked issues](docs/ISSUES.md).
 
 ## How to run it
 
@@ -88,11 +89,11 @@ The generated starter and contract tests come from [Gecko Academy's Dev3Pack cou
 
 Run `uv run pytest` and the unsupported trace above; its citations must be empty, needs_human_review true, and the trace must show no model call. For provider health, also run one supported trace; a refusal-only smoke check does not prove the model is reachable.
 
-Rollback target: 10 minutes (an operational target, not a measured duration). Revert the faulty commit with git revert, run all thirteen contract tests, and push the revert before submitting again. Never use the fake model as an undisclosed production fallback.
+Rollback target: 10 minutes (an operational target, not a measured duration). Revert the faulty commit with git revert, run all eighteen contract tests, and push the revert before submitting again. Never use the fake model as an undisclosed production fallback.
 
 ## Deliverables
 
 - agent.py: YourAgent and bounded provider/evidence adapters.
-- tests/test_contract.py: thirteen executable contract, memory, regression, coverage, refusal and provider-adapter checks.
+- tests/test_contract.py: eighteen executable contract, memory, regression, coverage, refusal, injection and provider-adapter checks.
 - data/corpus/: six read-only source documents.
 - docs/EVAL_REPORT.md, ISSUES.md, RETENTION.md, SKILL.md, adr/0001-run-shape.md: measurements, limits and operating decisions.

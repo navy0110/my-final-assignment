@@ -23,3 +23,8 @@ Course root: C:\Users\USUARIO\dev3pack-cohort-2026-09. Submission fork: C:\Users
 ## Official delivery result
 
 The bundle was delivered through https://github.com/Gecko-Academy/dev3pack-submissions/pull/711, whose submission check passed and which merged automatically on 2026-10-05. The course result evaluated commit 5bfad336c497a87803dab2c7f9f1d479454e3fdb: 10/15 (67%), overall_threshold=true, critical_safety=false, passed=false, certificate_eligible=false. The automatic CLI hand-in failed on an unsupported gh repo fork flag; the already-generated bundle was copied unchanged into an isolated branch of the existing submissions fork. No private questions were inspected to improve the code. Subsequent development must use public practice and general contract tests. The learner's cap01-e5 issue-list review remains pending.
+
+
+## Improvement branch checkpoint
+
+Branch codex/improve-public-evidence improves paragraph coverage and rejects uncited answers. Its full public 3B evaluation passed 10/10. A subsequent guard change detects commands hidden in lists or later lines; final offline tests: 18 passed, lint passed, including quoted examples and all real corpus documents. Full model grading was not repeated after the guard-only change. The improved version is prepared for review; no official resubmission has run. Next: review the change, update learner-authored cap01-e5 from the revised docs/ISSUES.md, merge/push the chosen final version, then authorize a new official submission. Do not tune on private cases.

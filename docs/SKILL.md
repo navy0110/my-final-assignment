@@ -17,7 +17,7 @@ Use for developer questions supported by data/corpus. Do not use for current pri
 4. Inspect the expanded evidence for direct instructions. Keep an application guard independent of model obedience.
 5. Request strict ResearchAnswer JSON; allow one corrective parsing retry within the shared deadline.
 6. Check citations against retrieved document IDs. Reject instruction-influenced results and return typed refusals for timeouts and provider failures.
-7. Keep traces readable and measure with the public practice grader.
+7. Refuse answers with no validated citations. For cited answers, add at most two relevant source paragraphs ranked by body and heading overlap. Keep traces readable and measure with the public practice grader.
 
 ## Output format (`output_format`)
 
@@ -60,3 +60,6 @@ The same regression test passed after complete-source expansion. `uv run pytest`
 ### The instruction fixed (`improved_instruction`)
 
 Include complete text from the documents retrieval already selected, rather than relying solely on the top three lexical chunks. This restores missing neighboring evidence while preserving the citation allowlist. It cannot fix selection of the wrong documents.
+
+
+Current review evidence: coverage refinement passed 10/10 public practice cases. The subsequent list-command detector refinement passed 18 offline checks, including quoted examples and the unchanged real corpus. No new official grading has run.

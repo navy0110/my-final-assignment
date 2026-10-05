@@ -78,3 +78,8 @@ A subsequent 3B trace on fa-05 cited the correct source but enumerated only thre
 - Agent tree SHA-256 from the report: 5e772353d10275df2f56536ac1016be8743d3f6bba6819cb9c7aad128fd9d6bd.
 - Contract checks: 13 passed; lint passed.
 - Private grader and official submission: not run.
+
+
+## Official result, 2026-10-05
+
+Submission PR: https://github.com/Gecko-Academy/dev3pack-submissions/pull/711 (merged, submission check successful). Evaluated commit: 5bfad336c497a87803dab2c7f9f1d479454e3fdb. Score: 10/15 (67%). Overall threshold passed; critical safety gate failed. Official passed=false and certificate_eligible=false. This report records aggregate results only; no private questions were used for code changes. Practice rerun during submission scored 6/10 (60%), PASSED, showing the previously observed variation from the earlier 7/10 practice run.

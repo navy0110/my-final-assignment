@@ -45,10 +45,55 @@ DIRECT_INSTRUCTION = re.compile(
 
 
 def contains_direct_instruction(text: str) -> bool:
-    for paragraph in text.split("\n\n"):
-        if DIRECT_INSTRUCTION.search(paragraph.strip()):
+    for line in text.splitlines():
+        # List formatting must not hide a direct order. Quoted examples still
+        # begin with their quotation marker and do not match this command guard.
+        candidate = re.sub(r"^\s*(?:[-*+]|\d+[.)])\s+", "", line).strip()
+        if DIRECT_INSTRUCTION.search(candidate):
             return True
     return False
+
+
+COMMON_WORDS = frozenset(
+    "the a an what which is are how does in of to and for it why should "
+    "can with against that help must not model question your rules just tell me".split()
+)
+
+
+def content_tokens(text: str) -> set[str]:
+    """A small lexical baseline; normalize plurals without external dependencies."""
+    return {
+        word[:-1] if word.endswith("s") and len(word) > 3 else word
+        for word in re.findall(r"[a-z0-9]+", text.lower())
+        if word not in COMMON_WORDS
+    }
+
+
+def supporting_excerpts(
+    question: str, documents: list[Document], answer: ResearchAnswer
+) -> list[str]:
+    """Quote at most two paragraphs per cited source, ranked by body and heading overlap."""
+    query = content_tokens(question)
+    excerpts: list[str] = []
+    for doc in documents:
+        if doc.doc_id not in answer.citations:
+            continue
+        heading = ""
+        candidates: list[tuple[int, int, str]] = []
+        for position, paragraph in enumerate(doc.text.split("\n\n")):
+            if paragraph.lstrip().startswith("#"):
+                heading = paragraph
+                continue
+            body_overlap = query & content_tokens(paragraph)
+            if not body_overlap or len(paragraph) < 40 or paragraph.startswith("```"):
+                continue
+            score = len(body_overlap) + 2 * len(query & content_tokens(heading))
+            candidates.append((score, position, paragraph))
+        candidates.sort(key=lambda item: (-item[0], item[1]))
+        for _, _, paragraph in candidates[:2]:
+            if paragraph not in answer.answer:
+                excerpts.append(f"Source excerpt [{doc.doc_id}]:\n{paragraph}")
+    return excerpts
 
 
 class StructuredOllamaClient(OllamaClient):
@@ -97,9 +142,9 @@ class EvidenceClient:
         # incidental lexical overlap. Never introduce an unretrieved source.
         normalized_question = " ".join(re.findall(r"[a-z0-9]+", question.lower()))
         primary = [
-            doc for doc in documents
-            if " ".join(re.findall(r"[a-z0-9]+", doc.title.lower()))
-            in normalized_question
+            doc
+            for doc in documents
+            if " ".join(re.findall(r"[a-z0-9]+", doc.title.lower())) in normalized_question
         ]
         if not any(contains_direct_instruction(doc.text) for doc in documents):
             documents = primary or documents
@@ -227,12 +272,7 @@ class YourAgent:
                     ),
                 )
 
-            if (
-                result.answer.needs_human_review
-                and not result.answer.citations
-                and result.answer.confidence == 0.0
-                and REFUSAL_TEXT not in result.answer.answer
-            ):
+            if not result.answer.citations:
                 return AgentResult(
                     answer=ResearchAnswer(
                         answer=REFUSAL_TEXT,
@@ -240,46 +280,21 @@ class YourAgent:
                         confidence=0.0,
                         needs_human_review=True,
                     ),
-                    trace=result.trace + (
-                        TraceEvent("decision", "Normalized zero-confidence uncited refusal."),
-                    ),
+                    trace=result.trace
+                    + (TraceEvent("decision", "No validated sources; flagged refusal."),),
                 )
-            # Restore omitted items only from a cited, relevant list section.
-            # This is extractive evidence, not a second generation request.
             if not result.answer.needs_human_review:
-                common_words = set(
-                    "the a an what which is are how does in of to and for it why should "
-                    "can with against that help".split()
-                )
-                query_words = set(re.findall(r"[a-z0-9]+", question.lower())) - common_words
-                additions: list[str] = []
-                for doc in evidence:
-                    if doc.doc_id not in result.answer.citations:
-                        continue
-                    heading_words: set[str] = set()
-                    for paragraph in doc.text.split("\n\n"):
-                        if paragraph.lstrip().startswith("#"):
-                            heading_words = set(re.findall(r"[a-z0-9]+", paragraph.lower()))
-                            continue
-                        labels = re.findall(r"\*\*(.+?)\*\*", paragraph)
-                        if len(labels) < 2 or not (query_words & heading_words):
-                            continue
-                        missing = any(
-                            label.lower() not in result.answer.answer.lower() for label in labels
-                        )
-                        if missing:
-                            additions.append(f"Source excerpt [{doc.doc_id}]:\n{paragraph}")
+                additions = supporting_excerpts(question, evidence, result.answer)
                 if additions:
                     return AgentResult(
                         answer=ResearchAnswer(
                             answer=result.answer.answer + "\n\n" + "\n\n".join(additions),
                             citations=result.answer.citations,
                             confidence=result.answer.confidence,
-                            needs_human_review=result.answer.needs_human_review,
+                            needs_human_review=False,
                         ),
-                        trace=result.trace + (
-                            TraceEvent("decision", "Added cited list excerpt for omitted labels."),
-                        ),
+                        trace=result.trace
+                        + (TraceEvent("decision", "Added relevant cited source excerpts."),),
                     )
             return result
 

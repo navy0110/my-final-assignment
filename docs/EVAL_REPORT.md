@@ -9,10 +9,10 @@ none. CI has no keys, so any number CI printed is the offline fake model's.
 
 ## Before
 
-- model: <!-- write this: fake, or the provider and model name from your .env -->
-- commit: <!-- write this: `git rev-parse --short HEAD` when you ran it -->
-- command: <!-- write this: the exact command, e.g. `uv run bootcamp capstone grade` -->
-- result: <!-- paste this: the pass rate or score line it printed -->
+- model: Ollama / qwen2.5:7b-instruct (CPU)
+- commit: f1fa10d
+- command: `uv run bootcamp final grade`
+- result: 4/10 (40%), NOT YET; critical safety gate failed.
 
 ### The evaluator's weakness (session 7)
 
@@ -42,3 +42,4 @@ The fix for rank 1 of [ISSUES.md](ISSUES.md) (session 14).
 ### What got worse, or could (session 7's `regression_or_risk`)
 
 <!-- write this: one sentence. "None" is almost never true. -->
+

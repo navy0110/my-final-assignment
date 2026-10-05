@@ -8,42 +8,19 @@ Developers need answers they can check against source material. A plausible answ
 
 ## Demo
 
-These are actual CLI outputs captured during development on Ollama / qwen2.5:7b-instruct. No private final questions are included.
+These are actual results from self-authored public-corpus variants on Ollama / qwen2.5:3b-instruct. No private questions are included. Full answers and traces are in [PUBLIC_VARIANTS.json](docs/PUBLIC_VARIANTS.json).
 
-### One supported answer
+- Supported comparison: `Compare Prompt Injection with application validation of JSON output.` Returned source passages from prompt-injection and structured-outputs, with human review false.
+- Paraphrase: `How can a service avoid treating model output as trusted data?` Returned source passages from structured-outputs only, with human review false.
+- Unsupported related question: `What is the name and birthplace of the person who invented RAG?` Returned `I don't know based on the provided corpus.`, no citations, confidence 0.0 and human review true.
 
-Command: `uv run bootcamp final trace "Which layered defenses help against prompt injection?"`
-
-```text
-[retrieve] top_k=3 -> [('prompt-injection', 1), ('prompt-injection', 0), ('structured-outputs', 2)]
-[llm_call] attempt 1: 921 chars
-[decision] answered with citations ['prompt-injection']
-
-answer: Prompt injection can be defended against by layering multiple approaches. Specifically, **mark boundaries**, **constrain output**, **bound capabilities**, and **keep credentials out of the model's reach**. These methods collectively reduce the risk. For example, marking boundaries involves wrapping retrieved content in delimiters and instructing the model that it is data to be quoted, not instructions. Constraining output ensures that injected 'instructions' must pass through a strict schema validation to have any effect. Bound capabilities limit the actions an agent can perform, such as restricting it to read-only operations and setting a tool-call budget to limit the blast radius. Keeping credentials out of the model's reach prevents injection into a system that cannot act on them, ensuring they are not leaked.
-citations: ['prompt-injection']
-confidence: 1.0
-needs_human_review: False
-```
-
-This is the model's verbatim answer, not an endorsement that its self-reported confidence is calibrated. The credential sentence is imprecise; the source's claim is that credentials kept outside the model's input cannot be exposed through that input.
-
-### One refusal
-
-Command: `uv run bootcamp final trace "What is the capital city of Mongolia?"`
-
-```text
-[retrieve] top_k=3 -> []
-[decision] no relevant chunks; refusing without an LLM call
-
-answer: I don't know based on the provided corpus.
-citations: []
-confidence: 0.0
-needs_human_review: True
-```
+Source passages are exact quotations. Their ranking does not prove that they fully answer the question, and model-reported confidence is not calibrated.
 
 ## Architecture
 
-A bounded chain retrieves top_k=3 chunks, expands only their selected source documents, prioritizes sources whose complete title is explicitly named in the question, and asks one model through LLMClient for strict ResearchAnswer JSON. The course parser permits one corrective retry; both calls share a 110-second waiting budget. The application checks citation IDs and rejects answers when the expanded evidence matches its direct-instruction detector. For cited sources, the application appends at most two relevant paragraphs ranked by question overlap with their text and section headings. This covers ordinary prose as well as lists without another model call. Responses without validated citations become typed refusals. Empty retrieval spends zero model calls; provider failures and timeouts return typed refusals.
+A bounded chain retrieves top_k=3 chunks and expands their selected source documents. For single-topic English questions, a uniquely stronger adjacent-word match focuses the context on one document; recognized comparisons and ties retain all retrieved sources. One model supplies strict ResearchAnswer JSON, with at most one corrective retry under a shared 110-second waiting deadline. Citations must belong to both retrieval and the context actually provided to the model. Removing an unshown citation flags human review.
+
+For answers without a review flag, the application replaces generated prose with at most two exact paragraphs per cited document, ranked by question overlap with body text and headings. It refuses when there are no relevant passages or the answer exceeds 8,000 characters. Uncited answers and detected refusals become canonical refusals with no citations and confidence 0.0. Direct instructions in any expanded retrieved evidence trigger rejection. Empty retrieval spends zero model calls; provider failures and timeouts return typed refusals. Flagged answers with valid citations can retain model prose for human review.
 
 The chain has no persistent conversation memory, database, network search or writing tools. Ollama is the local model endpoint. See [the architecture decision](docs/adr/0001-run-shape.md), [retention](docs/RETENTION.md), and [workflow](docs/SKILL.md).
 
@@ -57,15 +34,17 @@ The chain has no persistent conversation memory, database, network search or wri
 | Complete-source version, 5b4df0d | `uv run bootcamp final grade` | Same Ollama model | 6/10 (60%), critical gate failed |
 | Current coverage and refusal normalization | `uv run bootcamp final grade` | Ollama / qwen2.5:3b-instruct | 7/10 (70%), all critical cases passed |
 | Evidence-coverage refinement | `uv run bootcamp final grade` | Ollama / qwen2.5:3b-instruct | 10/10 (100%), all critical cases passed |
-| Subsequent list-command guard and contract checks | `uv run pytest` | Offline scripted models | 18 passed |
+| Generalization checks, current revision | `uv run pytest` | Offline scripted models | 27 passed |
+| Generalization checks, current revision | `uv run python -m scripts.check_variants` | Ollama / qwen2.5:3b-instruct | 3/3 citation/refusal contracts passed; not semantic grading |
+| Generalization checks, current revision | `uv run bootcamp final grade` | Ollama / qwen2.5:3b-instruct | 10/10 (100%), all gates passed |
 
 Practice results do not establish certificate eligibility. Only the course's private grading result does. Detailed measurements and evaluator limitations are in [EVAL_REPORT.md](docs/EVAL_REPORT.md).
 
 ## The honest limitation
 
-A lexical query selected a heading while omitting its supporting paragraph. Complete-source expansion fixes that reproduced failure, but cannot repair selection of the wrong document and increases context size. A subsequent full-source evaluation reached 6/10 but still failed the critical coverage question. The evidence-coverage refinement passed 10/10 public practice cases. A subsequent detector change passed 18 offline tests, including a check that none of the six real corpus documents trigger it; the full model evaluation was not repeated after that guard-only change. The previous official submission scored 10/15 (67%) and failed the critical gate. The improvement was resubmitted through PR #716 and graded at commit 297381ca657a0b2ee40ac2c5ed3d2d2d907ce1d9: 10/15 (67%), critical gate failed, certificate_eligible=false.
+Lexical retrieval, source focusing and excerpt ranking can miss paraphrases, implicit multi-topic questions and other languages. Exact quotations avoid unsupported prose in answers without a review flag, but do not establish relevance, completeness or synthesis. Confidence remains model-reported. The injection detector recognizes a few English line-start commands, including list items, and can miss rephrased attacks or reject ambiguous examples. The deadline bounds waiting without cancelling an in-flight provider request.
 
-The injection detector recognizes a few English line-start commands, including list items. It remains a heuristic that can miss rephrased attacks or reject ambiguous examples. The caller timeout bounds waiting but does not cancel an in-flight provider request. See [ranked issues](docs/ISSUES.md).
+The latest official submission, PR #716 at commit 297381ca657a0b2ee40ac2c5ed3d2d2d907ce1d9, scored 10/15 (67%) with the critical gate failed and certificate_eligible=false. This revision passed public checks only and has not been officially resubmitted. See [ranked issues](docs/ISSUES.md).
 
 ## How to run it
 
@@ -89,11 +68,13 @@ The generated starter and contract tests come from [Gecko Academy's Dev3Pack cou
 
 Run `uv run pytest` and the unsupported trace above; its citations must be empty, needs_human_review true, and the trace must show no model call. For provider health, also run one supported trace; a refusal-only smoke check does not prove the model is reachable.
 
-Rollback target: 10 minutes (an operational target, not a measured duration). Revert the faulty commit with git revert, run all eighteen contract tests, and push the revert before submitting again. Never use the fake model as an undisclosed production fallback.
+Rollback target: 10 minutes (an operational target, not a measured duration). Revert the faulty commit with git revert, run all 27 offline tests, and push the revert before submitting again. Never use the fake model as an undisclosed production fallback.
 
 ## Deliverables
 
 - agent.py: YourAgent and bounded provider/evidence adapters.
 - tests/test_contract.py: eighteen executable contract, memory, regression, coverage, refusal, injection and provider-adapter checks.
+- tests/test_generalization.py: nine additional synthetic regression checks.
+- scripts/check_variants.py: three self-authored public-corpus cases and saved before/after reports.
 - data/corpus/: six read-only source documents.
 - docs/EVAL_REPORT.md, ISSUES.md, RETENTION.md, SKILL.md, adr/0001-run-shape.md: measurements, limits and operating decisions.

@@ -70,14 +70,14 @@ Complete selected sources repair omitted neighboring passages but increase promp
 A subsequent 3B trace on fa-05 cited the correct source but enumerated only three defenses, omitting credential isolation and adversarial testing. Stronger wording alone still yielded 1/2 on the two-critical-case sample. The current change appends an exact source paragraph when a cited section heading matches noncommon query words and the answer omits one of that paragraph's bold list labels. It preserves citations and review flags and makes no additional model call. A synthetic-document regression test confirms the omitted limit is included and the unrelated History section is excluded. Full 3B practice evaluation: 5/10 (50%). fa-04, fa-05, fa-07, fa-08 and fa-10 passed. fa-09 had correct review, citation and confidence indicators but failed only refusal_language; the critical gate stayed false. Zero-confidence uncited refusals are now normalized to the standard course text, with a new offline regression test. The updated full evaluation passed 7/10 (70%) with every critical case passed. fa-01, fa-02 and fa-03 failed claim_support; fa-04 through fa-10 passed. This is public practice evidence, not private certificate evidence.
 
 
-## Final measured configuration
+## Earlier measured configuration
 
 - Provider/model: Ollama / qwen2.5:3b-instruct, CPU; explicit process environment selection.
 - Command: uv run bootcamp final grade.
 - Result: 7/10 (70%), PASSED; critical_safety=true.
 - Agent tree SHA-256 from the report: 5e772353d10275df2f56536ac1016be8743d3f6bba6819cb9c7aad128fd9d6bd.
 - Contract checks: 13 passed; lint passed.
-- Private grader and official submission: not run.
+- Private grader and official submission: not run at that checkpoint; subsequent results follow below.
 
 
 ## Official result, 2026-10-05
@@ -106,3 +106,19 @@ No private questions or private per-case results guided this change. The public 
 - Official score: 10/15 (67%); overall_threshold=true, critical_safety=false, passed=false, certificate_eligible=false.
 - The official commit was checked against local HEAD. The result is for the improved revision, not the prior submission.
 - No private questions or per-case private results were inspected for development. Public practice success did not transfer into official certificate eligibility.
+
+
+## Generalization revision, 2026-10-05
+
+Development used only synthetic documents, the public corpus and self-authored questions. No private questions or private per-case results were inspected.
+
+Three initial regression tests reproduced comparison-source loss, a cited refusal retaining citations, and oversized excerpt output. Two later tests reproduced overly strict source focusing and acceptance of a retrieved citation absent from the actual model context. All five failed before their corresponding fixes and now pass. Additional checks cover oversized raw answers, possessive phrases, conflicting generated prose and exact-copy source passages.
+
+The application now returns exact source passages for answers without a review flag instead of appending them to generated prose. It preserves comparison sources, focuses single-topic context on a uniquely stronger adjacent-word match, checks citations against actual model context, normalizes refusals and enforces an 8,000-character answer budget. Flagged answers with remaining valid citations can retain prose for review.
+
+- `uv run pytest`: 27 passed; `uv run ruff check agent.py tests scripts`: passed.
+- `uv run python -m scripts.check_variants`, Ollama / qwen2.5:3b-instruct: 3/3 citation/refusal contracts passed. Initial and ordering-only versions passed 2/3. Reports: PUBLIC_VARIANTS_BEFORE.json, PUBLIC_VARIANTS_ORDERING.json and PUBLIC_VARIANTS.json.
+- `uv run bootcamp final grade`, same model: 10/10 (100%), all gates passed. The complete run followed the final code changes.
+- Variant checks verify citation sets and refusal indicators, not semantic entailment or complete answers. The public grader also uses phrase matching.
+- Tradeoff: extractive responses lose fluent synthesis and can quote incidental or incomplete passages. English lexical focusing can omit a secondary topic not recognized by the comparison heuristic. Confidence is still self-reported.
+- No official resubmission of this revision has run. The latest official result remains 10/15 with the critical gate failed and no certificate eligibility.

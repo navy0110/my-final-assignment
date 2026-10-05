@@ -2,14 +2,14 @@
 
 | rank | issue | impact |
 |---:|---|---|
-| 1 | Lexical retrieval and excerpt ranking can miss paraphrases or favor incidental overlap. | Relevant evidence can still be omitted; complete-source expansion cannot recover an unretrieved document. |
-| 2 | Valid source IDs and appended excerpts do not establish that every generated claim is faithful; confidence remains model-reported. | Unsupported original prose or overconfidence can coexist with accurate quotations. |
+| 1 | Lexical retrieval, source focusing and excerpt ranking can miss paraphrases, implicit multi-topic questions and other languages. | Relevant evidence can be omitted or incidental passages selected. |
+| 2 | Exact quotations and valid citations do not prove question coverage; confidence remains model-reported. | Extractive answers can be incomplete, less fluent or overconfident. Flagged answers can retain prose requiring review. |
 | 3 | Direct-command detection covers a small set of English line-start patterns, including list items. | Rephrased attacks can bypass the heuristic; ambiguous examples can cause false positives. |
 
-## Fixed regression
+## Fixed regressions
 
-A retrieved security heading omitted its supporting paragraph. Complete-source expansion fixed the reproduced regression. A subsequent check covered only bold lists, omitting ordinary prose. The current paragraph ranking covers both forms and reached 10/10 public practice cases. The list-command guard was extended afterwards and passed the final 18 offline tests, including the unchanged real-corpus check.
+Complete-source expansion restored paragraphs omitted by chunk retrieval. Public synthetic regressions now also cover comparison-source loss, cited refusals, oversized output, incorrect phrase focusing, unshown citations and generated claims conflicting with source text. Current checks: 27 offline tests, three self-authored citation/refusal contracts and 10/10 public practice cases passed.
 
 ## Operational limitation
 
-The 110-second waiting deadline does not cancel an in-flight provider request. Avoid concurrent grading runs on CPU. The improved revision was officially resubmitted and again scored 10/15 (67%), with the critical gate failed. All 10 public practice cases passed. The private questions were not inspected or used for changes.
+The 110-second waiting deadline does not cancel an in-flight provider request. Avoid concurrent CPU grading. The latest official revision scored 10/15 (67%) with the critical gate failed. This new revision has only public evidence; private questions were not inspected or used for changes.

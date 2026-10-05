@@ -28,3 +28,8 @@ The bundle was delivered through https://github.com/Gecko-Academy/dev3pack-submi
 ## Improvement branch checkpoint
 
 Branch codex/improve-public-evidence improves paragraph coverage and rejects uncited answers. Its full public 3B evaluation passed 10/10. A subsequent guard change detects commands hidden in lists or later lines; final offline tests: 18 passed, lint passed, including quoted examples and all real corpus documents. Full model grading was not repeated after the guard-only change. The improved version is prepared for review; no official resubmission has run. Next: review the change, update learner-authored cap01-e5 from the revised docs/ISSUES.md, merge/push the chosen final version, then authorize a new official submission. Do not tune on private cases.
+
+
+## Latest state after authorized resubmission
+
+The improvement PR #1 merged, and main at 297381ca657a0b2ee40ac2c5ed3d2d2d907ce1d9 was officially resubmitted. Practice passed 10/10. Delivery PR #716 was accepted and merged; official grading again returned 10/15 (67%), critical_safety=false and certificate_eligible=false. The course's incompatible GitHub CLI fork option was bypassed by copying the completed bundle unchanged into the isolated submission branch. No new code changes followed the private result. The learner's cap01-e5 issue-list review remains pending. Further improvements must use public examples and general contract tests, never private-question tuning.

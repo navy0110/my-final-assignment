@@ -12,4 +12,4 @@ A retrieved security heading omitted its supporting paragraph. Complete-source e
 
 ## Operational limitation
 
-The 110-second waiting deadline does not cancel an in-flight provider request. Avoid concurrent grading runs on CPU. The previous official score remains 10/15 (67%) with the critical gate failed; this revision has not been resubmitted.
+The 110-second waiting deadline does not cancel an in-flight provider request. Avoid concurrent grading runs on CPU. The improved revision was officially resubmitted and again scored 10/15 (67%), with the critical gate failed. All 10 public practice cases passed. The private questions were not inspected or used for changes.

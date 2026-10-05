@@ -62,4 +62,4 @@ The same regression test passed after complete-source expansion. `uv run pytest`
 Include complete text from the documents retrieval already selected, rather than relying solely on the top three lexical chunks. This restores missing neighboring evidence while preserving the citation allowlist. It cannot fix selection of the wrong documents.
 
 
-Current review evidence: coverage refinement passed 10/10 public practice cases. The subsequent list-command detector refinement passed 18 offline checks, including quoted examples and the unchanged real corpus. No new official grading has run.
+Current review evidence: coverage refinement passed 10/10 public practice cases. The subsequent list-command detector refinement passed 18 offline checks, including quoted examples and the unchanged real corpus. The improvement was officially resubmitted through PR #716: 10/15 (67%), critical gate failed, no certificate eligibility.

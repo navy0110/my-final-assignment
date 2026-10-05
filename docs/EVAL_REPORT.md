@@ -95,3 +95,14 @@ No private questions or private per-case results guided this change. The public 
 - The full model evaluation was not repeated after that guard-only change.
 - New official submission: not run. The prior official result remains 10/15 with the critical gate failed.
 - Tradeoff: two quoted source paragraphs can lengthen answers and lexical overlap cannot establish entailment for the model's original prose.
+
+
+## Improved revision officially resubmitted, 2026-10-05
+
+- Improvement PR #1 merged into main; evaluated commit: 297381ca657a0b2ee40ac2c5ed3d2d2d907ce1d9.
+- Practice within the official submission command: 10/10 (100%), PASSED, on Ollama / qwen2.5:3b-instruct.
+- Generated all 15 final answers; the automatic fork step encountered the known GitHub CLI flag incompatibility.
+- The generated files were copied unchanged, with matching file hashes, and delivered in https://github.com/Gecko-Academy/dev3pack-submissions/pull/716. Its submission check passed and it merged automatically.
+- Official score: 10/15 (67%); overall_threshold=true, critical_safety=false, passed=false, certificate_eligible=false.
+- The official commit was checked against local HEAD. The result is for the improved revision, not the prior submission.
+- No private questions or per-case private results were inspected for development. Public practice success did not transfer into official certificate eligibility.

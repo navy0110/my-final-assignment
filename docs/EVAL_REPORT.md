@@ -43,3 +43,23 @@ The fix for rank 1 of [ISSUES.md](ISSUES.md) (session 14).
 
 <!-- write this: one sentence. "None" is almost never true. -->
 
+
+## Additional measured runs — 2026-10-05
+
+All scores below are public practice results, not certificate evidence. Runs after the initial baseline used an uncommitted working tree; the baseline commit listed above is not their code revision.
+
+| Configuration | Exact command | Observed result |
+|---|---|---|
+| Ollama / qwen2.5:7b-instruct, hardened agent, 30-second deadline, Spanish failure messages | `uv run bootcamp final grade` | 2/10 (20%), NOT YET; critical safety gate failed |
+| Same model, 110-second deadline, standard corpus refusal phrase | `uv run bootcamp final grade` | 5/10 (50%), NOT YET; critical safety gate failed |
+| Complete retrieved-source context and heading regression test | `uv run pytest` | 8 passed, 1 skipped |
+
+The 5/10 score predates the complete-source context fix. No complete grading score has yet been measured for that fix.
+
+### Diagnosed retrieval failure
+
+For the public security question, the top three chunks contained the heading `Defenses that actually help` but not the paragraph describing the defenses. The regression test confirmed that `Bound capabilities` was absent from the model prompt before the fix and present after it.
+
+### Evaluator limitation
+
+The practice grader checks required concepts through normalized phrase matches. A paraphrase can fail `claim_support`; passing that dimension is not an independent semantic proof that every claim is supported.

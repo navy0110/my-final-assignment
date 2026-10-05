@@ -1,21 +1,18 @@
 # Ranked issues
 
-**Filled by:** session 9 (the first list, `cap01-e5`), kept current until
-session 14, which fixes rank 1 and adds its regression test.
-
-At least three rows. Ranks 1, 2, 3... with no gap and no tie: two issues ranked
-1 is a list nobody prioritised. The impact is what orders it.
-
-The columns are the three fields `cap01-e5` reads.
-
 | rank | issue | impact |
 |---:|---|---|
-| 1 | <!-- write this: a sentence naming the issue --> | <!-- write this: who it hurts and how badly --> |
-| 2 | <!-- write this --> | <!-- write this --> |
-| 3 | <!-- write this --> | <!-- write this --> |
+| 1 | Lexical retrieval selected the security section heading while omitting its explanatory paragraph. | The model could not enumerate the documented defenses, causing failures on critical safety questions. |
+| 2 | The last complete Ollama evaluation passed 5 of 10 practice questions, before the full-source context fix. | The critical safety gate remained false; contract tests alone do not establish certificate eligibility. |
+| 3 | The instruction detector recognizes only a small set of English commands at paragraph starts. | Rephrased or embedded commands can evade detection; this heuristic is not a complete injection defense. |
 
-## Rank 1, in progress
+## Rank 1, fixed and awaiting full evaluation
 
-- The fix: <!-- write this (session 14) -->
-- The regression test: <!-- write this: its name in tests/ -->
+- Fix: include the complete text of each document already returned by retrieval. Do not add unreturned source IDs. Inspect the expanded source text for direct instructions.
+- Regression test: `test_regression_rank_1_of_the_issue_list`. It failed before the fix and passed after it.
+- Tradeoff: complete sources increase prompt size and may include irrelevant passages. A wrongly selected document is still a retrieval failure.
 - Before and after: see [EVAL_REPORT.md](EVAL_REPORT.md).
+
+## Operational limitation
+
+The 110-second waiting deadline does not cancel a provider request already running in a daemon thread. Repeated timeouts can leave overlapping requests until the underlying transport returns. Avoid concurrent grading runs on the CPU model.

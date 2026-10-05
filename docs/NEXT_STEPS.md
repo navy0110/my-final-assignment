@@ -1,27 +1,16 @@
-# Resume here
+# Current checkpoint
 
-Paused at the learner's request on 2026-10-05.
-
-## Current state
+Work resumed on 2026-10-05. The project has not been published or submitted.
 
 - Local repository: C:\Users\USUARIO\my-final-assignment.
-- Ollama: qwen2.5:7b-instruct, local endpoint, configured in ignored .env. Do not read or print .env.
-- Nine tests passed after replacing the memory and regression placeholders. No skip or xfail markers remain.
-- Full-source evidence expansion fixes the reproduced missing-security-paragraph failure. The live security trace cited prompt-injection and described the documented defenses.
-- The waiting deadline is 110 seconds. A timed-out worker can continue until its underlying provider request terminates.
-- The last completed full practice score was 5/10 (50%), NOT YET, before complete-source expansion. Do not attribute that score to the latest code.
-- The full grading run on the expanded-context version was interrupted to honor the pause. It produced no completed score. An Ollama request may take a short time to wind down.
-- docs/ISSUES.md, RETENTION.md, SKILL.md, and adr/0001-run-shape.md contain factual drafts. EVAL_REPORT.md records the measured history and limits.
-- README still needs its final project description and demos. The final EVAL_REPORT After section also needs a completed score for the latest implementation.
-- No GitHub origin or publication has been configured for this repository. Nothing has been submitted.
+- Eleven contract tests pass; lint passes. GitHub CLI is installed but has no authenticated account.
+- Ollama models available locally: qwen2.5:7b-instruct and qwen2.5:3b-instruct.
+- The current evaluation explicitly selects the 3B model through process environment variables. Persistent local configuration was not changed. Never read or print .env.
+- Latest completed full practice run: 79da180, 7B, 6/10, critical gate failed.
+- Latest complete 3B evaluation: 4/10; fa-07 citation failure fixed, critical gate still false.
+- The title-selected evidence version is undergoing full 7B public evaluation; result pending.
+- Provider requests use JSON mode, temperature=0, seed=0 and a shared 110-second waiting deadline. Deadline expiry does not cancel an in-flight request.
 
-## Next steps
+Next: record the full result, fix remaining critical failures if any, align final documentation, commit, publish the public repository and run the official submission from a clean pushed tree. Only public practice cases may guide development.
 
-1. Run `uv run bootcamp final grade` once and record its actual score and failing gates. Avoid concurrent model evaluations.
-2. Diagnose remaining retrieval/generation failures using traces. Do not inspect or tune on private final questions.
-3. Finish README and EVAL_REPORT with real command output, preserving honest limitations and source/AI-assistance credits.
-4. Copy the three ranked issues to cap01-e5 in the course notebook; let the learner author assessment cells in accordance with the course instructions. Check and submit from the course folder.
-5. Publish the final project to its own public navy0110 repository and push the lockfile and code. GitHub CLI was not found on PATH earlier.
-6. Only from a clean, pushed repository and with a real provider: prepare the final dry run, then submit to Gecko-Academy/dev3pack-submissions using the navy0110 fork.
-
-Relevant roots: C:\Users\USUARIO\dev3pack-cohort-2026-09 and C:\Users\USUARIO\submissions. Preserve completed student notebooks and never open solutions/ or secrets.
+The cap01 notebook passed 5/5 checks but its issue-list cell still needs learner review against docs/ISSUES.md. Course root: C:\Users\USUARIO\dev3pack-cohort-2026-09. Submission fork: C:\Users\USUARIO\submissions. Preserve completed notebooks and never open solutions/ or secrets.

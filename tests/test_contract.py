@@ -13,15 +13,8 @@ part of the contract it guards, so one part runs on its own:
     uv run pytest -k memory       # what a session remembers (session 11)
     uv run pytest -k regression   # the test for rank 1 of docs/ISSUES.md (session 14)
 
-Three tests are marked `xfail(strict=True)`: the starter agent does not do that
-part of the contract yet, and the marker says which session teaches it. When
-your agent starts doing it, the test passes, and `strict=True` turns that pass
-into a failure that says "XPASS". That is your cue: delete the marker, and the
-test becomes a pass you earned. `raises=AssertionError` means the xfail only
-counts when the CONTRACT fails, never a typo or a crash in the test itself.
-
-Two more are `skip` placeholders, for work that does not exist until a later
-session: replace the body with the real test when you get there.
+All eleven tests are active. The starter expected-failure and placeholder markers
+were removed as their corresponding safeguards and regression checks were implemented.
 """
 
 from __future__ import annotations
@@ -296,3 +289,52 @@ def test_regression_rank_1_of_the_issue_list() -> None:
     )
     assert answer.citations == ("prompt-injection",)
     assert not answer.needs_human_review
+
+
+def test_ollama_configuration_uses_json_and_one_bounded_request() -> None:
+    from io import BytesIO
+    from unittest.mock import patch
+
+    from bootcamp_agent.config import Settings
+
+    settings = Settings("ollama", "qwen2.5:7b-instruct", None, "http://localhost:11434/v1")
+    payload = {
+        "choices": [
+            {"message": {"content": _reply("Chunking respects paragraphs.", ["rag-basics"])}}
+        ]
+    }
+    with (
+        patch("agent.load_settings", return_value=settings),
+        patch(
+            "agent.urllib.request.urlopen", return_value=BytesIO(json.dumps(payload).encode())
+        ) as request,
+    ):
+        answer = YourAgent()(SUPPORTED)
+
+    assert request.call_count == 1
+    sent = request.call_args.args[0]
+    body = json.loads(sent.data)
+    assert sent.full_url == "http://localhost:11434/v1/chat/completions"
+    assert body["temperature"] == 0 and body["seed"] == 0
+    assert body["response_format"] == {"type": "json_object"}
+    assert body["max_tokens"] == 768
+    assert request.call_args.kwargs["timeout"] == 100
+    assert answer.citations == ("rag-basics",)
+    assert not answer.needs_human_review
+
+
+def test_malformed_ollama_envelope_returns_flagged_refusal() -> None:
+    from io import BytesIO
+    from unittest.mock import patch
+
+    from bootcamp_agent.config import Settings
+
+    settings = Settings("ollama", "qwen2.5:7b-instruct", None, "http://localhost:11434/v1")
+    with (
+        patch("agent.load_settings", return_value=settings),
+        patch("agent.urllib.request.urlopen", return_value=BytesIO(b"{}")) as request,
+    ):
+        answer = YourAgent()(SUPPORTED)
+
+    assert request.call_count == 1
+    assert _is_flagged_refusal(answer)

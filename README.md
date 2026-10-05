@@ -43,7 +43,7 @@ needs_human_review: True
 
 ## Architecture
 
-A bounded chain retrieves top_k=3 chunks, expands only their selected source documents, and asks one model through LLMClient for strict ResearchAnswer JSON. The course parser permits one corrective retry; both calls share a 110-second waiting budget. The application checks citation IDs and rejects answers when the expanded evidence matches its direct-instruction detector. Empty retrieval spends zero model calls; provider failures and timeouts return typed refusals.
+A bounded chain retrieves top_k=3 chunks, expands only their selected source documents, prioritizes sources whose complete title is explicitly named in the question, and asks one model through LLMClient for strict ResearchAnswer JSON. The course parser permits one corrective retry; both calls share a 110-second waiting budget. The application checks citation IDs and rejects answers when the expanded evidence matches its direct-instruction detector. Empty retrieval spends zero model calls; provider failures and timeouts return typed refusals.
 
 The chain has no persistent conversation memory, database, network search or writing tools. Ollama is the local model endpoint. See [the architecture decision](docs/adr/0001-run-shape.md), [retention](docs/RETENTION.md), and [workflow](docs/SKILL.md).
 
@@ -60,7 +60,7 @@ Practice results do not establish certificate eligibility. Only the course's pri
 
 ## The honest limitation
 
-A lexical query selected a heading while omitting its supporting paragraph. Complete-source expansion fixes that reproduced failure, but cannot repair selection of the wrong document and increases context size. A subsequent full-source evaluation reached 6/10 but still failed the critical coverage question. A general completeness instruction is now being evaluated; its final score is pending.
+A lexical query selected a heading while omitting its supporting paragraph. Complete-source expansion fixes that reproduced failure, but cannot repair selection of the wrong document and increases context size. A subsequent full-source evaluation reached 6/10 but still failed the critical coverage question. The latest complete 3B evaluation scored 5/10 with a critical citation-precision failure. A title-based evidence-selection refinement is now being evaluated; its complete score is pending.
 
 The injection detector recognizes only a few English paragraph-start patterns. The caller timeout bounds waiting but does not cancel an in-flight provider request. See [ranked issues](docs/ISSUES.md).
 
@@ -86,11 +86,11 @@ The generated starter and contract tests come from [Gecko Academy's Dev3Pack cou
 
 Run `uv run pytest` and the unsupported trace above; its citations must be empty, needs_human_review true, and the trace must show no model call. For provider health, also run one supported trace; a refusal-only smoke check does not prove the model is reachable.
 
-Rollback target: 10 minutes (an operational target, not a measured duration). Revert the faulty commit with git revert, run all nine contract tests, and push the revert before submitting again. Never use the fake model as an undisclosed production fallback.
+Rollback target: 10 minutes (an operational target, not a measured duration). Revert the faulty commit with git revert, run all eleven contract tests, and push the revert before submitting again. Never use the fake model as an undisclosed production fallback.
 
 ## Deliverables
 
 - agent.py: YourAgent and bounded provider/evidence adapters.
-- tests/test_contract.py: nine executable contract, memory and regression checks.
+- tests/test_contract.py: eleven executable contract, memory, regression and provider-adapter checks.
 - data/corpus/: six read-only source documents.
 - docs/EVAL_REPORT.md, ISSUES.md, RETENTION.md, SKILL.md, adr/0001-run-shape.md: measurements, limits and operating decisions.

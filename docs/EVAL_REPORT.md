@@ -24,11 +24,16 @@ The next change asks for complete relevant lists of stages, checks, defenses and
 - `uv run bootcamp final grade --random 1 --seed 14` selected the public security question fa-05. It failed claim_support (0/1). This is a targeted sample, not a complete score.
 - A subsequent run of the exact same public question through YourAgent.run and the course's evaluate_answer returned all gates passed. It cited prompt-injection and included all five documented defenses, including Test it / an adversarial document.
 - These runs demonstrate output variation on the real model. The successful diagnostic is not a replacement for a complete evaluation.
-- A complete score for the final coverage instruction is pending.
+- The complete coverage-instruction run at 79da180 scored 6/10; fa-07 failed claim_support, so the critical gate remained false.
+- JSON mode with temperature=0 and seed=0 was added to the Ollama adapter. A two-case sample on qwen2.5:3b-instruct passed fa-05 but failed fa-07 citation_precision (1/2); this is not a full score.
+- Full 3B evaluation with minimal-citation instructions: 5/10 (50%); fa-07 failed citation_precision. fa-04, fa-05 and fa-08 through fa-10 passed.
+- The traced fa-07 answer added mcp-overview alongside prompt-injection, even though its five defenses came from prompt-injection.
+- Adding source titles and a primary-source prompt alone still yielded 1/2 in the two-critical-case sample.
+- Current refinement limits evidence to retrieved sources whose full title occurs in the question, if any. Suspicious evidence bypasses this narrowing and remains subject to rejection. Full 3B evaluation after this refinement: 4/10 (40%); fa-07 passed, but fa-05 failed claim_support and fa-09 failed refusal_language. fa-02, fa-08 and fa-10 also passed. The same version is now being evaluated with 7B; result pending.
 
 ## Contract and notebook checks
 
-- `uv run pytest`: 9 passed, no skipped or xfailed tests.
+- `uv run pytest`: 11 passed, no skipped or xfailed tests.
 - `ruff check agent.py tests/test_contract.py`: passed.
 - In the course folder, `bootcamp check cap01`: 5/5 passed. This notebook uses the course reference pipeline; it does not grade this agent. Its issue list needs updating to match docs/ISSUES.md.
 

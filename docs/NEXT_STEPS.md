@@ -1,16 +1,21 @@
 # Current checkpoint
 
-Work resumed on 2026-10-05. The project has not been published or submitted.
+2026-10-05: public practice evaluation PASSED with Ollama / qwen2.5:3b-instruct.
 
-- Local repository: C:\Users\USUARIO\my-final-assignment.
-- Eleven contract tests pass; lint passes. GitHub CLI is installed but has no authenticated account.
-- Ollama models available locally: qwen2.5:7b-instruct and qwen2.5:3b-instruct.
-- The current evaluation explicitly selects the 3B model through process environment variables. Persistent local configuration was not changed. Never read or print .env.
-- Latest completed full practice run: 79da180, 7B, 6/10, critical gate failed.
-- Latest complete 3B evaluation: 4/10; fa-07 citation failure fixed, critical gate still false.
-- The title-selected evidence version is undergoing full 7B public evaluation; result pending.
-- Provider requests use JSON mode, temperature=0, seed=0 and a shared 110-second waiting deadline. Deadline expiry does not cancel an in-flight request.
+- Project: C:\Users\USUARIO\my-final-assignment.
+- Full public evaluation: 7/10 (70%); all five critical cases passed. fa-01, fa-02 and fa-03 failed claim_support.
+- Contract tests: 13 passed; lint passed.
+- Generation: JSON mode, temperature=0, seed=0, one initial call and one parsing retry sharing a 110-second deadline.
+- Cited relevant lists are completed with exact source excerpts when labels are omitted. Zero-confidence uncited flagged refusals use the standard course text.
+- The evaluation used explicit process environment variables for 3B. Persistent .env was not changed; never read or print it. Use BOOTCAMP_PROVIDER=ollama and BOOTCAMP_MODEL=qwen2.5:3b-instruct for the official submission.
+- GitHub CLI is installed at C:\Program Files\GitHub CLI\gh.exe, but no account was authenticated at the last check. The learner is completing browser authentication manually.
+- No origin, publication or official submission exists yet. Private grading was not run.
 
-Next: record the full result, fix remaining critical failures if any, align final documentation, commit, publish the public repository and run the official submission from a clean pushed tree. Only public practice cases may guide development.
+Next steps:
+1. Confirm gh auth status shows navy0110.
+2. Review the learner-authored cap01-e5 issue list against docs/ISSUES.md; course checks previously passed 5/5 but the issue text is stale.
+3. Publish the project as its own public navy0110/my-final-assignment repository and push the clean committed tree.
+4. Use the 3B provider configuration and DEV3PACK_API_BASE=https://app.geckovision.tech for bootcamp final submit --github navy0110.
+5. Read the official result in finals/navy0110/result.json; never inspect or tune on private final questions.
 
-The cap01 notebook passed 5/5 checks but its issue-list cell still needs learner review against docs/ISSUES.md. Course root: C:\Users\USUARIO\dev3pack-cohort-2026-09. Submission fork: C:\Users\USUARIO\submissions. Preserve completed notebooks and never open solutions/ or secrets.
+Course root: C:\Users\USUARIO\dev3pack-cohort-2026-09. Submission fork: C:\Users\USUARIO\submissions. Preserve completed notebooks; never open solutions/ or secrets.

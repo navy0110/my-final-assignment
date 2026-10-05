@@ -3,10 +3,10 @@
 | rank | issue | impact |
 |---:|---|---|
 | 1 | Lexical retrieval selected the security section heading while omitting its explanatory paragraph. | The model could not enumerate the documented defenses, causing failures on critical safety questions. |
-| 2 | The last complete Ollama evaluation passed 6 of 10 practice questions after the full-source context fix. | The critical safety gate remained false; contract tests alone do not establish certificate eligibility. |
+| 2 | The latest complete 3B evaluation passed 7 of 10; chunking, validation and stopping-condition answers failed claim_support. | All critical practice cases passed, but incomplete noncritical answers remain a quality limitation; private certificate eligibility is unverified. |
 | 3 | The instruction detector recognizes only a small set of English commands at paragraph starts. | Rephrased or embedded commands can evade detection; this heuristic is not a complete injection defense. |
 
-## Rank 1, fixed and awaiting full evaluation
+## Rank 1, fixed and evaluated
 
 - Fix: include the complete text of each document already returned by retrieval. Do not add unreturned source IDs. Inspect the expanded source text for direct instructions.
 - Regression test: `test_regression_rank_1_of_the_issue_list`. It failed before the fix and passed after it.

@@ -13,7 +13,7 @@ part of the contract it guards, so one part runs on its own:
     uv run pytest -k memory       # what a session remembers (session 11)
     uv run pytest -k regression   # the test for rank 1 of docs/ISSUES.md (session 14)
 
-All eleven tests are active. The starter expected-failure and placeholder markers
+All thirteen tests are active. The starter expected-failure and placeholder markers
 were removed as their corresponding safeguards and regression checks were implemented.
 """
 
@@ -338,3 +338,37 @@ def test_malformed_ollama_envelope_returns_flagged_refusal() -> None:
 
     assert request.call_count == 1
     assert _is_flagged_refusal(answer)
+
+
+def test_omitted_list_items_are_quoted_from_cited_relevant_section() -> None:
+    from bootcamp_agent.documents import Document
+
+    paragraph = "**Read limit**: three reads. **Write limit**: zero writes."
+    model = FakeLLM(default=_reply("Read limit: three reads.", ["limits"]))
+    agent = YourAgent(client=model)
+    agent.documents = [
+        Document(
+            doc_id="limits",
+            title="Storage Limits",
+            text="# Storage limits\n\n"
+            + paragraph
+            + "\n\n## History\n\n**Origin**: a demo. **Timeline**: yesterday.",
+            source="limits.md",
+            tags=(),
+        )
+    ]
+
+    result = agent.run("What storage limits apply?")
+    assert paragraph in result.answer.answer
+    assert "**Origin**" not in result.answer.answer
+    assert result.answer.citations == ("limits",)
+    assert not result.answer.needs_human_review
+    assert len(model.calls) == 1
+
+
+def test_zero_confidence_uncited_refusal_has_standard_language() -> None:
+    model = FakeLLM(default=_reply("Nao sei com base nas fontes.", [], confidence=0.0, review=True))
+    answer = YourAgent(client=model)(SUPPORTED)
+    assert _is_flagged_refusal(answer)
+    assert answer.answer == "I don't know based on the provided corpus."
+    assert len(model.calls) == 1

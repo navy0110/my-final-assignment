@@ -116,6 +116,8 @@ class EvidenceClient:
             + (
                 "\nAnswer the complete question using the source documents. "
                 "Explain each relevant mechanism explicitly and preserve its technical terms. "
+                "Copy relevant bold labels verbatim, then explain them using the source wording. "
+                "Use short source quotations for key mechanisms instead of loose paraphrases. "
                 "When a source lists relevant stages, checks, defenses or stopping conditions, "
                 "cover the complete relevant list rather than selecting a few examples. "
                 "Include the documented operational verification steps when applicable. "
@@ -130,6 +132,9 @@ class EvidenceClient:
             + self.context
             + "\n\nQuestion: "
             + self.question
+            + "\n\nResponse requirements: explain ALL relevant items from the source list. "
+            + "For each item, preserve its label and explain how it works. "
+            + "Do not stop after a few examples. Return only the required JSON object."
             + retry,
         )
 
@@ -222,6 +227,60 @@ class YourAgent:
                     ),
                 )
 
+            if (
+                result.answer.needs_human_review
+                and not result.answer.citations
+                and result.answer.confidence == 0.0
+                and REFUSAL_TEXT not in result.answer.answer
+            ):
+                return AgentResult(
+                    answer=ResearchAnswer(
+                        answer=REFUSAL_TEXT,
+                        citations=(),
+                        confidence=0.0,
+                        needs_human_review=True,
+                    ),
+                    trace=result.trace + (
+                        TraceEvent("decision", "Normalized zero-confidence uncited refusal."),
+                    ),
+                )
+            # Restore omitted items only from a cited, relevant list section.
+            # This is extractive evidence, not a second generation request.
+            if not result.answer.needs_human_review:
+                common_words = set(
+                    "the a an what which is are how does in of to and for it why should "
+                    "can with against that help".split()
+                )
+                query_words = set(re.findall(r"[a-z0-9]+", question.lower())) - common_words
+                additions: list[str] = []
+                for doc in evidence:
+                    if doc.doc_id not in result.answer.citations:
+                        continue
+                    heading_words: set[str] = set()
+                    for paragraph in doc.text.split("\n\n"):
+                        if paragraph.lstrip().startswith("#"):
+                            heading_words = set(re.findall(r"[a-z0-9]+", paragraph.lower()))
+                            continue
+                        labels = re.findall(r"\*\*(.+?)\*\*", paragraph)
+                        if len(labels) < 2 or not (query_words & heading_words):
+                            continue
+                        missing = any(
+                            label.lower() not in result.answer.answer.lower() for label in labels
+                        )
+                        if missing:
+                            additions.append(f"Source excerpt [{doc.doc_id}]:\n{paragraph}")
+                if additions:
+                    return AgentResult(
+                        answer=ResearchAnswer(
+                            answer=result.answer.answer + "\n\n" + "\n\n".join(additions),
+                            citations=result.answer.citations,
+                            confidence=result.answer.confidence,
+                            needs_human_review=result.answer.needs_human_review,
+                        ),
+                        trace=result.trace + (
+                            TraceEvent("decision", "Added cited list excerpt for omitted labels."),
+                        ),
+                    )
             return result
 
         except TimeoutError:

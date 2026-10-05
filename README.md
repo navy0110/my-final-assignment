@@ -1,115 +1,96 @@
-# my-final-assignment
+# Source-grounded developer research assistant
 
-<!-- write this: one sentence. What it answers, from what, and what it does when
-the sources say nothing. -->
-
-![check](https://github.com/navy0110/my-final-assignment/actions/workflows/check.yml/badge.svg)
+A developer research assistant that answers from six versioned course documents, checks source citations, and refuses unsupported questions and detected instruction attacks.
 
 ## The problem
 
-<!-- write this: who has the problem, and what goes wrong for them today. Two to
-four sentences: minute 1 of your demo, in writing. -->
+Developers need answers they can check against source material. A plausible answer without a valid citation can mislead them, while instructions embedded in retrieved documents can redirect a model away from the task.
 
 ## Demo
 
-Two runs, pasted exactly as the commands printed them. Never an edited one.
-`trace` prints every step the agent took, then the answer.
+These are actual CLI outputs captured during development on Ollama / qwen2.5:7b-instruct. No private final questions are included.
 
 ### One supported answer
 
-```bash
-uv run bootcamp capstone trace "How does chunking work in RAG?"
-```
+Command: `uv run bootcamp final trace "Which layered defenses help against prompt injection?"`
 
 ```text
-<!-- paste this: the output. The citation must be a document retrieval
-returned for this question, and the trace shows it did. -->
+[retrieve] top_k=3 -> [('prompt-injection', 1), ('prompt-injection', 0), ('structured-outputs', 2)]
+[llm_call] attempt 1: 921 chars
+[decision] answered with citations ['prompt-injection']
+
+answer: Prompt injection can be defended against by layering multiple approaches. Specifically, **mark boundaries**, **constrain output**, **bound capabilities**, and **keep credentials out of the model's reach**. These methods collectively reduce the risk. For example, marking boundaries involves wrapping retrieved content in delimiters and instructing the model that it is data to be quoted, not instructions. Constraining output ensures that injected 'instructions' must pass through a strict schema validation to have any effect. Bound capabilities limit the actions an agent can perform, such as restricting it to read-only operations and setting a tool-call budget to limit the blast radius. Keeping credentials out of the model's reach prevents injection into a system that cannot act on them, ensuring they are not leaked.
+citations: ['prompt-injection']
+confidence: 1.0
+needs_human_review: False
 ```
+
+This is the model's verbatim answer, not an endorsement that its self-reported confidence is calibrated. The credential sentence is imprecise; the source's claim is that credentials kept outside the model's input cannot be exposed through that input.
 
 ### One refusal
 
-```bash
-uv run bootcamp capstone trace "What is the capital city of Mongolia?"
-```
+Command: `uv run bootcamp final trace "What is the capital city of Mongolia?"`
 
 ```text
-<!-- paste this: the output. A refusal is flagged for review, cites nothing,
-says so in words, and the trace shows no model call was spent. -->
+[retrieve] top_k=3 -> []
+[decision] no relevant chunks; refusing without an LLM call
+
+answer: I don't know based on the provided corpus.
+citations: []
+confidence: 0.0
+needs_human_review: True
 ```
 
 ## Architecture
 
-<!-- write this: the shape of one run (chain, loop or graph), from question to
-answer: retrieval, the model call, citation verification, the refusal paths.
-Name the model calls one question costs. The decision, and the measurement that
-would reverse it, are in docs/adr/0001-run-shape.md. -->
+A bounded chain retrieves top_k=3 chunks, expands only their selected source documents, and asks one model through LLMClient for strict ResearchAnswer JSON. The course parser permits one corrective retry; both calls share a 110-second waiting budget. The application checks citation IDs and rejects answers when the expanded evidence matches its direct-instruction detector. Empty retrieval spends zero model calls; provider failures and timeouts return typed refusals.
 
-See [docs/adr/0001-run-shape.md](docs/adr/0001-run-shape.md).
+The chain has no persistent conversation memory, database, network search or writing tools. Ollama is the local model endpoint. See [the architecture decision](docs/adr/0001-run-shape.md), [retention](docs/RETENTION.md), and [workflow](docs/SKILL.md).
 
 ## Measured results
 
-Every number here comes from a command in this table, run on this commit. Say
-which model produced it: CI has no keys, so a CI number is always the offline
-fake model's.
-
-| What | Command | Model | Result |
+| Version | Command | Model | Observed result |
 |---|---|---|---|
-| Contract tests | `uv run pytest` | fake | <!-- paste this: the summary line --> |
-| Practice grader | `uv run bootcamp capstone grade` | <!-- write this --> | <!-- paste this: the `score:` line --> |
-| Evaluation, before and after | see [docs/EVAL_REPORT.md](docs/EVAL_REPORT.md) | <!-- write this --> | <!-- paste this: the two pass rates --> |
+| Initial starter, f1fa10d | `uv run bootcamp final grade` | Ollama / qwen2.5:7b-instruct | 4/10 (40%), critical gate failed |
+| Hardened agent before complete-source expansion | `uv run bootcamp final grade` | Same Ollama model | 5/10 (50%), critical gate failed |
+| Complete-source expansion and stateless-memory test, 5b4df0d | `uv run pytest` | Offline scripted models | 9 passed |
+| Complete-source version, 5b4df0d | `uv run bootcamp final grade` | Same Ollama model | 6/10 (60%), critical gate failed |
+
+Practice results do not establish certificate eligibility. Only the course's private grading result does. Detailed measurements and evaluator limitations are in [EVAL_REPORT.md](docs/EVAL_REPORT.md).
 
 ## The honest limitation
 
-<!-- write this: rank 1 of docs/ISSUES.md in one sentence, and the next step
-you would take. Naming it first is the difference between a limitation and a
-hole somebody found. -->
+A lexical query selected a heading while omitting its supporting paragraph. Complete-source expansion fixes that reproduced failure, but cannot repair selection of the wrong document and increases context size. A subsequent full-source evaluation reached 6/10 but still failed the critical coverage question. A general completeness instruction is now being evaluated; its final score is pending.
 
-The full ranked list is in [docs/ISSUES.md](docs/ISSUES.md).
+The injection detector recognizes only a few English paragraph-start patterns. The caller timeout bounds waiting but does not cancel an in-flight provider request. See [ranked issues](docs/ISSUES.md).
 
 ## How to run it
 
-```bash
-git clone https://github.com/navy0110/my-final-assignment && cd my-final-assignment && uv sync && uv run pytest
-```
+From the local project folder: `uv sync && uv run pytest`.
 
-No key needed: without a `.env` it runs on the offline fake model. For a real
-model, copy `.env.example` to `.env`, fill in your provider, and
-`uv sync --extra anthropic` (or `--extra openai`).
+For live answers, install Ollama, pull `qwen2.5:7b-instruct`, and configure an ignored local .env with BOOTCAMP_PROVIDER=ollama and BOOTCAMP_MODEL=qwen2.5:7b-instruct. No API key is needed. Then run `uv run bootcamp final trace "How does chunking work in RAG?"`.
 
-To hand in the final assignment, commit and push, then run
-`uv run bootcamp capstone submit --github <you>`. It runs the practice set
-first, then answers the final questions and opens the pull request.
-`--dry-run` shows the bundle without handing anything in.
+Without a provider, the offline fake model is the default. It is appropriate for tests, not for certificate submission. Do not run concurrent evaluations on the CPU model.
+
+The project has not yet been published. After publication, use `git clone https://github.com/navy0110/my-final-assignment && cd my-final-assignment && uv sync && uv run pytest`.
 
 ## Sources
 
-<!-- optional. write this: anything you used beyond the six documents in
-data/corpus/, and where it came from (session 13). Delete the section if none. -->
+Answer sources are only the six unchanged files in data/corpus. The pinned course package at 81a918144aeae97db58c871c1f4e2be68cdd1bc5 supplies parsing, retrieval, citation checks, adapters, CLI and the public grader.
 
 ## Credits
 
-<!-- optional. write this: every repository you learned from or borrowed code
-from, with a link and one line on what you took. Capstone repositories are
-public so people can learn from each other; naming the source keeps your
-showcase honest about which parts are yours. Delete the section if none. -->
+The generated starter and contract tests come from [Gecko Academy's Dev3Pack course](https://github.com/Gecko-Academy/dev3pack-cohort-2026-09). Development used Codex explanations, review, debugging and implementation assistance for timeout handling, evidence expansion, safety checks, tests and documentation. The learner must review and understand this work before submission.
 
-## Rollback
+## Smoke check and rollback
 
-<!-- optional. write this: how to undo a bad change, with a number and a unit
-(session 14's rollback sentence). Delete the section if you have none yet. -->
+Run `uv run pytest` and the unsupported trace above; its citations must be empty, needs_human_review true, and the trace must show no model call. For provider health, also run one supported trace; a refusal-only smoke check does not prove the model is reachable.
 
----
+Rollback target: 10 minutes (an operational target, not a measured duration). Revert the faulty commit with git revert, run all nine contract tests, and push the revert before submitting again. Never use the fake model as an undisclosed production fallback.
 
-| Path | What it is |
-|---|---|
-| `agent.py` | The agent: `YourAgent`, the class the tests, `trace` and the grader run |
-| `tests/test_contract.py` | The capstone contract, as tests (`uv run pytest -k refusal`, `-k injection`, ...) |
-| `data/corpus/` | The six source documents, versioned; nothing here writes to them |
-| `docs/EVAL_REPORT.md` | Numbers you produced, before and after, with the command behind each |
-| `docs/SKILL.md` | A skill another assistant can load (session 10) |
-| `docs/adr/0001-run-shape.md` | The architecture decision and what would reverse it (session 10) |
-| `docs/RETENTION.md` | What a session remembers, and what it refuses to (session 11) |
-| `docs/ISSUES.md` | The ranked issue list (session 9, kept until 14) |
+## Deliverables
 
-Built during the Dev3Pack AI Engineering bootcamp, on the course package at
-commit `81a918144aeae97db58c871c1f4e2be68cdd1bc5` of https://github.com/Gecko-Academy/dev3pack-cohort-2026-09.
+- agent.py: YourAgent and bounded provider/evidence adapters.
+- tests/test_contract.py: nine executable contract, memory and regression checks.
+- data/corpus/: six read-only source documents.
+- docs/EVAL_REPORT.md, ISSUES.md, RETENTION.md, SKILL.md, adr/0001-run-shape.md: measurements, limits and operating decisions.

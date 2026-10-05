@@ -74,7 +74,7 @@ For the current evaluated configuration, install Ollama, pull `qwen2.5:3b-instru
 
 Without a provider, the offline fake model is the default. It is appropriate for tests, not for certificate submission. Do not run concurrent evaluations on the CPU model.
 
-The project has not yet been published. After publication, use `git clone https://github.com/navy0110/my-final-assignment && cd my-final-assignment && uv sync && uv run pytest`.
+Public repository: https://github.com/navy0110/my-final-assignment. Clone and verify with `git clone https://github.com/navy0110/my-final-assignment && cd my-final-assignment && uv sync && uv run pytest`.
 
 ## Sources
 

@@ -8,8 +8,8 @@
 - Generation: JSON mode, temperature=0, seed=0, one initial call and one parsing retry sharing a 110-second deadline.
 - Cited relevant lists are completed with exact source excerpts when labels are omitted. Zero-confidence uncited flagged refusals use the standard course text.
 - The evaluation used explicit process environment variables for 3B. Persistent .env was not changed; never read or print it. Use BOOTCAMP_PROVIDER=ollama and BOOTCAMP_MODEL=qwen2.5:3b-instruct for the official submission.
-- GitHub CLI is installed at C:\Program Files\GitHub CLI\gh.exe, but no account was authenticated at the last check. The learner is completing browser authentication manually.
-- No origin, publication or official submission exists yet. Private grading was not run.
+- GitHub CLI is installed at C:\Program Files\GitHub CLI\gh.exe, authenticated as navy0110.
+- Public origin: https://github.com/navy0110/my-final-assignment. The approved code is published. Official submission and private grading remain pending.
 
 Next steps:
 1. Confirm gh auth status shows navy0110.

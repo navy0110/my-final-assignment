@@ -29,7 +29,6 @@ from __future__ import annotations
 import json
 import threading
 
-import pytest
 from bootcamp_agent.documents import Document
 from bootcamp_agent.llm import FakeLLM
 from bootcamp_agent.tools import Tool
@@ -265,12 +264,26 @@ def test_tools_no_writing_tool_is_wired() -> None:
 # ------------------------------------------------ later sessions: placeholders
 
 
-@pytest.mark.skip(
-    reason="session 11: write this when your agent remembers. Prove the cap, the reset, "
-    "and that one user's memory never answers another's."
-)
 def test_memory_is_capped_reset_and_kept_per_user() -> None:
-    raise NotImplementedError
+    first_question = "How does chunking work in RAG? session-marker-001"
+    model = FakeLLM(default=_reply("Chunking respects paragraph boundaries.", ["rag-basics"]))
+    agent = YourAgent(client=model)
+    agent(first_question)
+
+    model.default = _reply("MCP connects hosts, clients and servers.", ["mcp-overview"])
+    agent("What is MCP?")
+    assert "session-marker-001" not in model.calls[-1][1], "previous questions must not persist"
+
+    calls_before = len(model.calls)
+    refusal = agent(UNSUPPORTED)
+    assert _is_flagged_refusal(refusal)
+    assert len(model.calls) == calls_before, "previous evidence must not answer a new question"
+
+    other_model = FakeLLM(default=model.default)
+    other_agent = YourAgent(client=other_model)
+    other_agent("What is MCP?")
+    assert "session-marker-001" not in other_model.calls[-1][1]
+    assert agent.documents is not other_agent.documents
 
 
 def test_regression_rank_1_of_the_issue_list() -> None:

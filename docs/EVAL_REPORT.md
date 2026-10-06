@@ -148,3 +148,15 @@ A two-paragraph cap per cited source silently omitted requested information. Two
 Remove the arbitrary paragraph-count cap while keeping query-overlap filtering and the 8,000-character final answer limit. If relevant quotations exceed that limit, return a flagged refusal instead of silently omitting a section. There is no additional model call or source ID. All 45 offline checks and lint pass. Live Ollama / qwen2.5:3b-instruct passed the self-authored public security coverage case and the complete practice set, 10/10 (100%), all gates passed.
 
 Tradeoff: weak lexical overlap can include incidental paragraphs and produce longer answers or more budget refusals. Matching phrases in tests do not establish semantic completeness. This change is based only on the public corpus and synthetic sources; no private questions or per-case results were inspected. No official resubmission of this revision has run.
+
+
+Official coverage revision, 2026-10-06: PR #756 merged; commit cca6296c86897c951598e0ade84b3a753bae0bad. Public practice 10/10; official aggregate 13/15 (87%), overall_threshold=true, critical_safety=false, certificate_eligible=false. No private per-case results inspected.
+
+
+## Public conjoined-topic coverage, 2026-10-06
+
+A self-authored public question combining prompt injection defenses and JSON parsing failure handling retrieved both relevant documents, but phrase focusing discarded structured-outputs. The new context regression failed before the fix. A synthetic two-source end-to-end case also checks preserved quotations and citations.
+
+Before focusing on a single source, split the question at English and/while or semicolon/question-mark boundaries. If different clauses have different uniquely highest token-overlap sources, retain all retrieved documents. The existing recognized-comparison and tie rules remain. No new source IDs or model calls are introduced.
+
+All 47 offline tests and lint passed. Live Ollama qwen2.5:3b-instruct passed the self-authored two-topic coverage case, including both sources and the expected public concepts. Complete live public practice passed 10/10 (100%), all gates passed, after the code change. Lexical clause scoring can still confuse incidental mentions, ambiguous topics or other languages, and retaining more context can increase citation errors. No private questions or per-case results were inspected.

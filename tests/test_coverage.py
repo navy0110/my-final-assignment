@@ -144,3 +144,33 @@ def test_exact_count_focus_requires_the_requested_quantity_not_a_generic_budget(
         agent.client, "What exact number of retries is allowed after parsing fails?", docs
     )
     assert client.source_ids == frozenset({"structured-outputs"})
+
+
+def test_public_safeguard_paraphrase_keeps_cited_defense_evidence():
+    model = FakeLLM(
+        default=json.dumps(
+            dict(
+                answer="Mark boundaries and constrain output to protect against untrusted content.",
+                citations=["prompt-injection"],
+                confidence=0.9,
+                needs_human_review=False,
+            )
+        )
+    )
+    agent = YourAgent(client=model)
+    answer = agent("Which safeguards reduce risks from hostile OpenAPI descriptions?")
+    assert not answer.needs_human_review
+    assert "**Mark boundaries**" in answer.answer
+    assert "**Constrain output**" in answer.answer
+    assert "**Test it**" in answer.answer
+
+
+def test_plural_phrase_focuses_source_about_the_actual_attack_surface():
+    from agent import EvidenceClient
+
+    agent = YourAgent(client=model_reply("prompt-injection"))
+    docs = [doc for doc in agent.documents if doc.doc_id in {"prompt-injection", "agent-loops"}]
+    client = EvidenceClient(
+        agent.client, "Which safeguards reduce risks from hostile OpenAPI descriptions?", docs
+    )
+    assert client.source_ids == frozenset({"prompt-injection"})

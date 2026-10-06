@@ -93,6 +93,16 @@ def content_pairs(text: str) -> set[tuple[str, str]]:
     """Preserve adjacent content terms, including possessive model-output phrases."""
     normalized = re.sub(r"['’]s\b", "", text.lower())
     words = re.findall(r"[a-z0-9]+", normalized)
+    words = [
+        word
+        if word in COMMON_WORDS
+        else word[:-3] + "y"
+        if len(word) > 4 and word.endswith("ies")
+        else word[:-1]
+        if len(word) > 3 and word.endswith("s") and not word.endswith("ss")
+        else word
+        for word in words
+    ]
     stopwords = COMMON_WORDS - {"model"}
     return {
         (left, right)
@@ -167,6 +177,7 @@ def supporting_excerpts(
 ) -> list[str]:
     """Quote matching paragraphs per cited source; the final answer enforces its size budget."""
     query = content_tokens(question)
+    draft_pairs = content_pairs(answer.answer)
     excerpts: list[str] = []
     for doc in documents:
         if doc.doc_id not in answer.citations:
@@ -178,9 +189,18 @@ def supporting_excerpts(
                 heading = paragraph
                 continue
             body_overlap = query & content_tokens(paragraph)
-            if not body_overlap or len(paragraph) < 40 or paragraph.startswith("```"):
+            draft_overlap = draft_pairs & content_pairs(paragraph)
+            if (
+                (not body_overlap and len(draft_overlap) < 2)
+                or len(paragraph) < 40
+                or paragraph.startswith("```")
+            ):
                 continue
-            score = len(body_overlap) + 2 * len(query & content_tokens(heading))
+            score = (
+                len(body_overlap)
+                + 2 * len(query & content_tokens(heading))
+                + 2 * len(draft_overlap)
+            )
             candidates.append((score, position, paragraph))
         candidates.sort(key=lambda item: (-item[0], item[1]))
         for _, _, paragraph in candidates:

@@ -11,19 +11,23 @@
       "trace": [
         {
           "kind": "retrieve",
+          "detail": "Query expanded with English inflection variants."
+        },
+        {
+          "kind": "retrieve",
           "detail": "top_k=3 -> [('agent-loops', 1), ('mcp-overview', 1), ('agent-loops', 2)]"
         },
         {
           "kind": "llm_call",
-          "detail": "attempt 1: 302 chars"
+          "detail": "attempt 1: 326 chars"
         },
         {
           "kind": "decision",
-          "detail": "answered with citations ['agent-loops']"
+          "detail": "answered with citations ['mcp-overview']"
         },
         {
           "kind": "decision",
-          "detail": "Requested quantitative fact absent from cited passages."
+          "detail": "Uncited answer or refusal normalized; citations cleared."
         }
       ]
     },
@@ -41,7 +45,7 @@
         },
         {
           "kind": "llm_call",
-          "detail": "attempt 1: 268 chars"
+          "detail": "attempt 1: 155 chars"
         },
         {
           "kind": "decision",
@@ -63,7 +67,11 @@
       "trace": [
         {
           "kind": "retrieve",
-          "detail": "top_k=3 -> [('prompt-injection', 1), ('agent-loops', 0), ('mcp-overview', 2)]"
+          "detail": "Query expanded with English inflection variants."
+        },
+        {
+          "kind": "retrieve",
+          "detail": "top_k=3 -> [('prompt-injection', 1), ('agent-loops', 0), ('rag-basics', 3)]"
         },
         {
           "kind": "llm_call",

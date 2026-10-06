@@ -1,0 +1,29 @@
+{
+  "scope": "Self-authored question about a numeric fact in the public corpus; explicit source title.",
+  "question": "What exact number of retries is allowed when Structured Outputs parsing fails?",
+  "passed": true,
+  "answer": "Relevant source passages:\n\nSource excerpt [structured-outputs]:\nA language model produces text. Software needs data. Structured outputs are the\ncontract between the two: instead of asking a model to \"answer the question,\" you\nask it to return a specific shape — usually JSON with named fields — and your\napplication validates that shape before using it.\n\nSource excerpt [structured-outputs]:\nTwo rules keep this honest. First, the application — not the model — is responsible\nfor parsing and validation. Treat the model's output as untrusted input: parse it\nstrictly, reject unknown fields, and fail loudly on malformed JSON. Second, design\nthe schema so that refusal is expressible. A model that cannot say \"I don't know\"\ninside the schema will be pushed toward inventing an answer that fits.\n\nSource excerpt [structured-outputs]:\nParsing can fail even with a good prompt. A robust pattern is: attempt to parse;\non failure, retry once with a corrective instruction (\"return only the JSON\nobject, no prose\"); on a second failure, return a typed refusal with\n`needs_human_review` set to true. This keeps the failure visible and bounded\ninstead of letting malformed output leak into downstream code.\n\nSource excerpt [structured-outputs]:\nStructured output is not about making the model smarter. It is about making the\nboundary between probabilistic text and deterministic software explicit,\nvalidated, and testable. Every field you add to a schema is a claim you can now\nwrite a test against.",
+  "citations": [
+    "structured-outputs"
+  ],
+  "confidence": 0.95,
+  "needs_human_review": false,
+  "trace": [
+    {
+      "kind": "retrieve",
+      "detail": "top_k=3 -> [('structured-outputs', 0), ('structured-outputs', 2), ('agent-loops', 1)]"
+    },
+    {
+      "kind": "llm_call",
+      "detail": "attempt 1: 426 chars"
+    },
+    {
+      "kind": "decision",
+      "detail": "answered with citations ['structured-outputs']"
+    },
+    {
+      "kind": "decision",
+      "detail": "Returned cited source passages; model prose omitted."
+    }
+  ]
+}

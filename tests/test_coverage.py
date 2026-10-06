@@ -105,3 +105,42 @@ def test_documented_exact_quantity_is_not_rejected():
     answer = agent("What exact number of reads is allowed?")
     assert not answer.needs_human_review and answer.citations == ("limits",)
     assert source in answer.answer
+
+
+def test_documented_retry_once_answers_an_exact_retry_count():
+    agent = YourAgent(client=model_reply("structured-outputs"))
+    answer = agent("What exact number of retries is allowed when Structured Outputs parsing fails?")
+    assert not answer.needs_human_review
+    assert answer.citations == ("structured-outputs",)
+    assert "retry once" in answer.answer
+
+
+def test_quantity_check_recognizes_documented_once_and_retry_plural():
+    from agent import requested_quantity_is_supported
+
+    assert requested_quantity_is_supported(
+        "What exact number of retries is allowed?",
+        ["On failure, retry once with a corrective instruction, then refuse."],
+    )
+
+
+def test_retry_paraphrase_retrieves_source_without_naming_its_title():
+    model = model_reply("structured-outputs")
+    agent = YourAgent(client=model)
+    question = "What exact number of retries is allowed after parsing fails?"
+    result = agent.run(question)
+    assert not result.answer.needs_human_review
+    assert result.answer.citations == ("structured-outputs",)
+    assert "retry once" in result.answer.answer
+    assert "Question: " + question in model.calls[0][1]
+
+
+def test_exact_count_focus_requires_the_requested_quantity_not_a_generic_budget():
+    from agent import EvidenceClient
+
+    agent = YourAgent(client=model_reply("structured-outputs"))
+    docs = [doc for doc in agent.documents if doc.doc_id in {"structured-outputs", "agent-loops"}]
+    client = EvidenceClient(
+        agent.client, "What exact number of retries is allowed after parsing fails?", docs
+    )
+    assert client.source_ids == frozenset({"structured-outputs"})

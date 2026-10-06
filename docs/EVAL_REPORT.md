@@ -172,3 +172,22 @@ Three self-authored questions requested absent facts about public topics. Baseli
 A new offline regression reproduced the unsupported-count answer; a documented synthetic read count remains allowed. For explicit English exact/specific number, amount or count requests, require both the requested topic tokens and a recognized numeric quantity in one cited sentence. Otherwise return the canonical flagged refusal. All 49 offline tests and lint pass; the live rerun passed all three refusal contracts. Full live public practice passed 10/10 (100%), all gates passed.
 
 This is a narrow guard, not general entailment. It can reject numeric paraphrases or unsupported inflections, and a coincident number/topic in a sentence can still be misleading. Other types of unsupported facts remain the model's responsibility. No private questions or per-case results guided the change; the latest official result remains 13/15 with the critical gate failed.
+
+
+Official quantity revision, 2026-10-06: PR #759 merged; evaluated commit ba443c8e09d2b7aa0c237a52dfecbc9b9670dd87. Practice 10/10; official aggregate 12/15 (80%), critical_safety=false, certificate_eligible=false. This is worse than the prior 13/15; aggregate data does not establish which change or output caused the regression. No private per-case results inspected.
+
+
+## Documented quantity forms and retrieval inflections, 2026-10-06
+
+Two numeric-support tests failed on the committed quantity guard: documented retry-once evidence was rejected for a plural retry-count question. Normalize the -ies topic form and recognize once/twice as quantities. These tests now pass without loosening the absent universal-count refusal.
+
+A separate source-retrieval regression failed for a self-authored retry-count question without a document title: the raw query retrieved agent-loops and evaluation-basics, omitting structured-outputs. Adding retry/fail variants retrieved structured-outputs. Expand simple English -ies/-s query forms while preserving original terms, using the same expanded query for both top_k=3 retrieval calls. The EvidenceClient still presents the original user question to the model; traces identify query expansion. Corpus files remain unchanged.
+
+All 52 offline tests and lint passed. The previous pending quantity-form practice report completed at 10/10; the final expanded-retrieval live checks are pending. No private questions or per-case results were used. Simple stemming may add misleading terms; exact-count validation still does not establish semantic entailment. Latest official aggregate remains 12/15 with the critical gate failed; best earlier aggregate was 13/15.
+
+
+The first expanded-query live probe retrieved the correct document and quoted retry once, but also cited agent-loops for a generic budget; the strict source-set check failed. A new context regression reproduced that incidental citation opportunity. For single-topic exact-count questions, retain sources containing both the requested topic and a recognized quantity in one sentence, when such sources exist. Comparisons, distinct topic clauses and suspicious evidence bypass this narrowing. Questions without an explicit count request keep the ordinary selection behavior.
+
+Final offline suite: 53 tests passed; lint passed. The live rerun is pending. This check remains lexical: quantities can be coincidental and paraphrases can be missed. No private questions or per-case results were inspected.
+
+Final resumed live checks: inflection-retrieval case passed with only structured-outputs; absent-fact probes passed 3/3; complete public practice passed 10/10 (100%), all gates passed on Ollama qwen2.5:3b-instruct. All checks followed the final source-focusing change. No official evaluation of this revision has run yet.

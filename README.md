@@ -18,7 +18,7 @@ Source passages are exact quotations. Their ranking does not prove that they ful
 
 ## Architecture
 
-A bounded chain retrieves top_k=3 chunks and expands their selected source documents. For single-topic English questions, a uniquely stronger adjacent-word match focuses the context on one document; recognized comparisons, ties and clauses with distinct lexical source winners retain all retrieved sources. One model supplies strict ResearchAnswer JSON, with at most one corrective retry under a shared 110-second waiting deadline. Citations must belong to both retrieval and the context actually provided to the model. Removing an unshown citation flags human review.
+A bounded chain expands simple English query inflections and retrieves top_k=3 chunks and expands their selected source documents. For single-topic English questions, a uniquely stronger adjacent-word match focuses the context on one document; recognized comparisons, ties and clauses with distinct lexical source winners retain all retrieved sources. One model supplies strict ResearchAnswer JSON, with at most one corrective retry under a shared 110-second waiting deadline. Citations must belong to both retrieval and the context actually provided to the model. Removing an unshown citation flags human review.
 
 For answers without a review flag, the application replaces generated prose with all matching exact paragraphs per cited document, ranked by question overlap with body text and headings. It refuses when there are no relevant passages or the answer exceeds 8,000 characters. Uncited answers and detected refusals become canonical refusals with no citations and confidence 0.0. Direct instructions in any expanded retrieved evidence trigger rejection. Empty retrieval spends zero model calls; provider failures and timeouts return typed refusals. Flagged answers with valid citations can retain model prose for human review.
 
@@ -44,7 +44,7 @@ Practice results do not establish certificate eligibility. Only the course's pri
 
 Lexical retrieval, source focusing and excerpt ranking can miss paraphrases, implicit multi-topic questions and other languages. Exact quotations avoid unsupported prose in answers without a review flag, but do not establish relevance, completeness or synthesis. Confidence remains model-reported. The injection detector normalizes Unicode presentation and recognizes selected English line-start commands, list items, role prefixes and assignments, and can miss rephrased attacks or reject ambiguous examples. The deadline bounds waiting without cancelling an in-flight provider request.
 
-The latest official submission, PR #757 at commit 546b388db837957edf279ea3e931e8f58c4cd300, scored 13/15 (87%) with the critical gate failed and certificate_eligible=false. Practice during submission passed 10/10. No private questions or per-case results were inspected. See [ranked issues](docs/ISSUES.md).
+The latest official submission, PR #759 at commit ba443c8e09d2b7aa0c237a52dfecbc9b9670dd87, scored 12/15 (80%) with the critical gate failed and certificate_eligible=false. Practice during submission passed 10/10. No private questions or per-case results were inspected. See [ranked issues](docs/ISSUES.md).
 
 ## How to run it
 
@@ -68,7 +68,7 @@ The generated starter and contract tests come from [Gecko Academy's Dev3Pack cou
 
 Run `uv run pytest` and the unsupported trace above; its citations must be empty, needs_human_review true, and the trace must show no model call. For provider health, also run one supported trace; a refusal-only smoke check does not prove the model is reachable.
 
-Rollback target: 10 minutes (an operational target, not a measured duration). Revert the faulty commit with git revert, run all 49 offline tests, and push the revert before submitting again. Never use the fake model as an undisclosed production fallback.
+Rollback target: 10 minutes (an operational target, not a measured duration). Revert the faulty commit with git revert, run all 53 offline tests, and push the revert before submitting again. Never use the fake model as an undisclosed production fallback.
 
 ## Deliverables
 
@@ -82,3 +82,5 @@ Rollback target: 10 minutes (an operational target, not a measured duration). Re
 Security refinement under review: eleven synthetic attack variants and five educational counterexamples were added; 43 offline tests and lint pass. The previous official result remains 12/15 with no certification.
 
 Explicit English requests for an exact number/amount/count now require a matching quantity and topic in a cited sentence. Unsupported requests become flagged refusals. This narrow check is not general semantic validation.
+
+For single-topic explicit exact-count questions, source focusing also checks that a source contains the requested quantity/topic together. Recognized comparisons and suspicious evidence bypass this narrowing. Numeric provenance checks remain lexical heuristics.

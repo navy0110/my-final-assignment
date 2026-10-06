@@ -19,7 +19,7 @@
         },
         {
           "kind": "llm_call",
-          "detail": "attempt 1: 326 chars"
+          "detail": "attempt 1: 316 chars"
         },
         {
           "kind": "decision",
@@ -45,7 +45,7 @@
         },
         {
           "kind": "llm_call",
-          "detail": "attempt 1: 268 chars"
+          "detail": "attempt 1: 155 chars"
         },
         {
           "kind": "decision",

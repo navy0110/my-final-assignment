@@ -126,3 +126,25 @@ def test_citation_must_have_reached_model_not_merely_retrieval():
     assert "Storage risks require audit validation" not in model.calls[0][1]
     assert answer.citations == ("limits",)
     assert answer.needs_human_review and answer.confidence <= 0.2
+
+
+def test_review_flag_cannot_bypass_grounded_output_validation():
+    source = "Storage limits permit three reads and zero writes; exceeding them stops the task."
+    model = FakeLLM(default=reply("Storage allows unlimited writes.", ["limits"], review=True))
+    agent = YourAgent(client=model)
+    agent.documents = [Document("limits", "Storage Limits", source, "limits.md", ())]
+    answer = agent("Explain the storage limits.")
+    assert "unlimited writes" not in answer.answer
+    assert source in answer.answer
+    assert answer.needs_human_review and answer.citations == ("limits",)
+
+
+def test_reviewed_answer_without_relevant_passage_is_canonical_refusal():
+    source = "Storage limits permit three reads and zero writes; exceeding them stops the task."
+    model = FakeLLM(default=reply("The founder lives in Paris.", ["limits"], review=True))
+    agent = YourAgent(client=model)
+    agent.documents = [Document("limits", "Storage Limits", source, "limits.md", ())]
+    answer = agent("Where does the founder live?")
+    assert answer.answer == REFUSAL_TEXT
+    assert answer.citations == () and answer.confidence == 0.0
+    assert answer.needs_human_review

@@ -27,3 +27,5 @@ Documented retry-once evidence now survives plural exact-count requests. Simple 
 A public safeguard paraphrase omitted the cited defenses paragraph under query-only filtering. Draft term-pair hints restore source quotations without exposing generated prose. Relevance and incidental matches remain risks; current offline suite: 54 passed.
 
 Consistent plural normalization in adjacent-term scoring fixes a reproduced incidental citation on the public OpenAPI safeguard question. Current offline suite: 55 passed; heuristic scoring and draft-hint relevance remain imperfect.
+
+Reviewed-answer validation gap: a valid citation plus human-review flag previously exposed generated claims without passage validation. A synthetic unlimited-writes claim reproduced this bypass. Both reviewed and unreviewed answers now use the same evidence checks and exact excerpts; review remains enabled when requested. Lexical relevance remains a limitation.

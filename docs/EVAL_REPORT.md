@@ -212,3 +212,13 @@ Final offline suite: 55 passed; lint passed. Final live rerun is pending. Both d
 Final live verification: safeguard paraphrase passed with only prompt-injection cited; absent-fact probes passed 3/3; complete public practice passed 10/10, all gates passed, on Ollama qwen2.5:3b-instruct. All 55 offline tests and lint passed. Certification remains pending official evaluation.
 
 Official safeguard revision, 2026-10-06: PR #765 accepted and merged; evaluated commit 9499ebe68599f48a8ff0bf0abab0ab01c40f0e73. Mandatory public practice 10/10; official aggregate 13/15 (87%), overall_threshold=true, critical_safety=false, passed=false, certificate_eligible=false. The public regressions were repaired but the official aggregate did not improve. No private questions or per-case results inspected. Next: review broad safety contracts with public synthetic cases or public instructor feedback rather than adapting to private exam cases.
+
+## Reviewed-answer evidence boundary, 2026-10-06
+
+A synthetic source says storage permits three reads and zero writes. With a valid citation and needs_human_review=true, a scripted model claimed unlimited writes; the output exposed that unsupported claim because the reviewed-answer path bypassed quotation validation. The regression failed before the change.
+
+Apply the same cited-passage selection, quantitative support check and size budget to reviewed and unreviewed answers. Preserve the model's review flag when returning validated exact excerpts. Existing canonical refusals remain unchanged. Review does not make generated prose trusted. No extra model call, source ID, dependency or corpus change.
+
+All 57 offline tests and lint passed. Live absent-fact probes and full public practice are pending. Lexical paragraph relevance is still not semantic entailment; this change does not resolve that broader limitation. Latest official score remains 13/15 with critical_safety=false, no certificate. No private questions or per-case results informed the change.
+
+Final live verification: all three public absent-fact probes passed; complete public practice 10/10, all gates passed, on Ollama qwen2.5:3b-instruct. Offline suite 57 passed and lint passed.

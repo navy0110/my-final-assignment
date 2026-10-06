@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 import urllib.error
 import urllib.request
 from concurrent.futures import Future
@@ -41,21 +42,33 @@ MULTI_TOPIC = re.compile(
 )
 
 DIRECT_INSTRUCTION = re.compile(
-    r"^(?:"
-    r"ignore\s+(?:all\s+)?(?:your\s+)?(?:previous|prior|system)\s+instructions"
-    r"|disregard\s+(?:all\s+)?(?:previous|prior|system)\s+instructions"
-    r"|set\s+(?:the\s+)?confidence\s+to\s+1(?:\.0)?\b"
-    r"|set\s+needs_human_review\s+to\s+false\b"
+    r"^(?:please\s+)?(?:"
+    r"(?:ignore|disregard|override)\s+(?:all\s+)?(?:the\s+|your\s+)?"
+    r"(?:previous|prior|system)\s+(?:instructions|rules|prompt)\b"
+    r"|(?:set\s+(?:the\s+)?)?confidence\s*(?:to\s+|[:=]\s*)1(?:\.0)?\b"
+    r"|(?:set\s+)?needs_human_review\s*(?:to\s+|[:=]\s*)false\b"
+    r"|(?:disable|skip|bypass)\s+(?:the\s+)?human\s+review\b"
+    r"|(?:reveal|print|send|expose)\s+(?:the\s+|all\s+|your\s+)?"
+    r"(?:api\s+keys?|credentials|secrets|passwords?|system\s+prompt)\b"
     r")",
     re.IGNORECASE,
 )
 
 
 def contains_direct_instruction(text: str) -> bool:
-    for line in text.splitlines():
-        # List formatting must not hide a direct order. Quoted examples still
-        # begin with their quotation marker and do not match this command guard.
-        candidate = re.sub(r"^\s*(?:[-*+]|\d+[.)])\s+", "", line).strip()
+    # Normalize presentation tricks only for detection; source quotations stay intact.
+    normalized = unicodedata.normalize("NFKC", text)
+    normalized = "".join(char for char in normalized if unicodedata.category(char) != "Cf")
+    for line in normalized.splitlines():
+        candidate = line.strip()
+        # Educational quotations remain data, not executable commands.
+        if candidate.startswith((">", '"', "'", "“", "‘")):
+            continue
+        candidate = re.sub(r"^(?:[-*+]|\d+[.)])\s+", "", candidate)
+        candidate = candidate.replace("**", "").replace("__", "").strip("` ")
+        candidate = re.sub(
+            r"^(?:system\s*:|\[system\]|<system>)\s*", "", candidate, flags=re.IGNORECASE
+        )
         if DIRECT_INSTRUCTION.search(candidate):
             return True
     return False

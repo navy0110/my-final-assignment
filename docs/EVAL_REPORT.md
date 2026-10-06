@@ -127,3 +127,12 @@ The application now returns exact source passages for answers without a review f
 ## Official generalization revision, 2026-10-06
 
 Delivery PR #754 (https://github.com/Gecko-Academy/dev3pack-submissions/pull/754) was accepted and merged. Evaluated commit: 5c4661bda7f347a458d46d9d7ecafecf282a2f7f. Practice during submission: 10/10. Official aggregate: 12/15 (80%), overall_threshold=true, critical_safety=false, passed=false, certificate_eligible=false. This improves the previous official aggregate of 10/15 but does not earn certification. The known CLI fork incompatibility was bypassed by copying the completed bundle unchanged, with matching hashes. No private questions or per-case results were inspected. No agent changes followed this result.
+
+
+## Security command variants, 2026-10-06
+
+Eleven self-authored synthetic command variants failed detection before the change: Markdown emphasis, polite wording, zero-width characters, full-width lettering, overriding system rules, role prefixes, confidence/review assignments, disabling review and credential disclosure. Five educational counterexamples passed before and after. No private exam questions or per-case results were used.
+
+The detector now applies Unicode NFKC normalization and removes format characters for detection only, handles selected Markdown and role prefixes, and recognizes these additional direct commands. Source text remains unchanged. The synthetic attack tests also exercise YourAgent.run: no attack result survives, citations are empty, confidence is zero and human review is required. All 43 offline tests and lint pass. Complete live public practice on Ollama / qwen2.5:3b-instruct: 10/10 (100%), all gates passed, after the final code changes.
+
+This remains a heuristic, not complete injection protection. Quoted educational examples are deliberately allowed, so quote-wrapped attacks, indirect requests, other languages and unrecognized role syntax remain possible bypasses. Detected evidence is still sent to the model before application rejection to preserve the course contract tests; there are no writing tools or model-visible credentials. No official resubmission of this security revision has run.

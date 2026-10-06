@@ -25,3 +25,6 @@ Preserve completed notebooks and the read-only corpus.
 ## Official generalization revision, 2026-10-06
 
 Delivery PR #754 (https://github.com/Gecko-Academy/dev3pack-submissions/pull/754) was accepted and merged. Evaluated commit: 5c4661bda7f347a458d46d9d7ecafecf282a2f7f. Practice during submission: 10/10. Official aggregate: 12/15 (80%), overall_threshold=true, critical_safety=false, passed=false, certificate_eligible=false. This improves the previous official aggregate of 10/15 but does not earn certification. The known CLI fork incompatibility was bypassed by copying the completed bundle unchanged, with matching hashes. No private questions or per-case results were inspected. No agent changes followed this result.
+
+
+Security review branch codex/security-command-variants: 43 offline tests, lint and complete public Ollama practice (10/10) passed. Eleven synthetic command variants failed detection before the fix and now are rejected; five educational counterexamples remain allowed. Review this finite heuristic extension before any new official submission. No private per-case results were inspected.

@@ -32,6 +32,13 @@ from bootcamp_agent.tools import Tool, build_tools
 #: The six course documents, copied in by `bootcamp capstone new`. Versioned
 #: input: nothing you build writes to it.
 CORPUS_DIR = Path(__file__).resolve().parent / "data" / "corpus"
+MAX_ANSWER_CHARS = 8000
+
+MULTI_TOPIC = re.compile(
+    r"\b(?:compare|comparison|contrast|difference|versus|vs|relate|relationship)\b"
+    r"|\band\s+(?:how|why|what|when|which|explain|describe)\b",
+    re.IGNORECASE,
+)
 
 DIRECT_INSTRUCTION = re.compile(
     r"^(?:"
@@ -69,6 +76,18 @@ def content_tokens(text: str) -> set[str]:
     }
 
 
+def content_pairs(text: str) -> set[tuple[str, str]]:
+    """Preserve adjacent content terms, including possessive model-output phrases."""
+    normalized = re.sub(r"['’]s\b", "", text.lower())
+    words = re.findall(r"[a-z0-9]+", normalized)
+    stopwords = COMMON_WORDS - {"model"}
+    return {
+        (left, right)
+        for left, right in zip(words, words[1:], strict=False)
+        if left not in stopwords and right not in stopwords
+    }
+
+
 def supporting_excerpts(
     question: str, documents: list[Document], answer: ResearchAnswer
 ) -> list[str]:
@@ -91,9 +110,18 @@ def supporting_excerpts(
             candidates.append((score, position, paragraph))
         candidates.sort(key=lambda item: (-item[0], item[1]))
         for _, _, paragraph in candidates[:2]:
-            if paragraph not in answer.answer:
-                excerpts.append(f"Source excerpt [{doc.doc_id}]:\n{paragraph}")
+            excerpts.append(f"Source excerpt [{doc.doc_id}]:\n{paragraph}")
     return excerpts
+
+
+def flagged_result(trace: tuple[TraceEvent, ...], detail: str) -> AgentResult:
+    """Fail closed without truncating a claim or a quoted source paragraph."""
+    return AgentResult(
+        answer=ResearchAnswer(
+            answer=REFUSAL_TEXT, citations=(), confidence=0.0, needs_human_review=True
+        ),
+        trace=trace + (TraceEvent("decision", detail),),
+    )
 
 
 class StructuredOllamaClient(OllamaClient):
@@ -138,16 +166,24 @@ class EvidenceClient:
     def __init__(self, client: LLMClient, question: str, documents: list[Document]) -> None:
         self.client = client
         self.question = question
-        # An explicit source title identifies the topic more precisely than
-        # incidental lexical overlap. Never introduce an unretrieved source.
-        normalized_question = " ".join(re.findall(r"[a-z0-9]+", question.lower()))
-        primary = [
-            doc
-            for doc in documents
-            if " ".join(re.findall(r"[a-z0-9]+", doc.title.lower())) in normalized_question
+        # Single-topic questions may have one source with a unique phrase match.
+        # Ambiguous and comparative questions retain all retrieved sources.
+        query_pairs = content_pairs(question)
+        scored = [
+            (len(query_pairs & content_pairs(doc.title + " " + doc.text)), doc) for doc in documents
         ]
-        if not any(contains_direct_instruction(doc.text) for doc in documents):
-            documents = primary or documents
+        scored.sort(key=lambda item: -item[0])
+        if (
+            not MULTI_TOPIC.search(question)
+            and not any(contains_direct_instruction(doc.text) for doc in documents)
+            and scored
+            and scored[0][0] > 0
+            and (len(scored) == 1 or scored[0][0] > scored[1][0])
+        ):
+            documents = [scored[0][1]]
+        else:
+            documents = [doc for _, doc in scored]
+        self.source_ids = frozenset(doc.doc_id for doc in documents)
         self.context = json.dumps(
             [{"doc_id": doc.doc_id, "title": doc.title, "text": doc.text} for doc in documents],
             ensure_ascii=False,
@@ -244,7 +280,8 @@ class YourAgent:
             retrieved_ids = {item.chunk.doc_id for item in scored}
             evidence = [doc for doc in self.documents if doc.doc_id in retrieved_ids]
             suspicious = any(contains_direct_instruction(doc.text) for doc in evidence)
-            client = DeadlineClient(EvidenceClient(self.client, question, evidence), self.timeout_s)
+            evidence_client = EvidenceClient(self.client, question, evidence)
+            client = DeadlineClient(evidence_client, self.timeout_s)
 
             result = answer_question(
                 question,
@@ -272,7 +309,31 @@ class YourAgent:
                     ),
                 )
 
-            if not result.answer.citations:
+            unshown = set(result.answer.citations) - evidence_client.source_ids
+            if unshown:
+                result = AgentResult(
+                    answer=ResearchAnswer(
+                        answer=result.answer.answer,
+                        citations=tuple(
+                            doc_id
+                            for doc_id in result.answer.citations
+                            if doc_id in evidence_client.source_ids
+                        ),
+                        confidence=min(result.answer.confidence, 0.2),
+                        needs_human_review=True,
+                    ),
+                    trace=result.trace
+                    + (
+                        TraceEvent(
+                            "decision", "Unshown citations stripped; human review required."
+                        ),
+                    ),
+                )
+
+            refused = (
+                result.answer.needs_human_review and result.answer.confidence == 0.0
+            ) or result.answer.answer.strip().casefold().startswith(REFUSAL_TEXT.casefold())
+            if refused or not result.answer.citations:
                 return AgentResult(
                     answer=ResearchAnswer(
                         answer=REFUSAL_TEXT,
@@ -281,21 +342,35 @@ class YourAgent:
                         needs_human_review=True,
                     ),
                     trace=result.trace
-                    + (TraceEvent("decision", "No validated sources; flagged refusal."),),
-                )
-            if not result.answer.needs_human_review:
-                additions = supporting_excerpts(question, evidence, result.answer)
-                if additions:
-                    return AgentResult(
-                        answer=ResearchAnswer(
-                            answer=result.answer.answer + "\n\n" + "\n\n".join(additions),
-                            citations=result.answer.citations,
-                            confidence=result.answer.confidence,
-                            needs_human_review=False,
+                    + (
+                        TraceEvent(
+                            "decision", "Uncited answer or refusal normalized; citations cleared."
                         ),
-                        trace=result.trace
-                        + (TraceEvent("decision", "Added relevant cited source excerpts."),),
-                    )
+                    ),
+                )
+            if len(result.answer.answer) > MAX_ANSWER_CHARS:
+                return flagged_result(result.trace, "Model answer exceeds character budget.")
+            if not result.answer.needs_human_review:
+                passages = supporting_excerpts(question, evidence, result.answer)
+                if not passages:
+                    return flagged_result(result.trace, "No relevant cited source passage.")
+                combined = "Relevant source passages:\n\n" + "\n\n".join(passages)
+                if len(combined) > MAX_ANSWER_CHARS:
+                    return flagged_result(result.trace, "Source excerpts exceed character budget.")
+                return AgentResult(
+                    answer=ResearchAnswer(
+                        answer=combined,
+                        citations=result.answer.citations,
+                        confidence=result.answer.confidence,
+                        needs_human_review=False,
+                    ),
+                    trace=result.trace
+                    + (
+                        TraceEvent(
+                            "decision", "Returned cited source passages; model prose omitted."
+                        ),
+                    ),
+                )
             return result
 
         except TimeoutError:

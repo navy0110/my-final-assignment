@@ -19,3 +19,7 @@ WE REFUSE TO REMEMBER: API keys, credentials, personal profiles, private final q
 ## Operational boundary
 
 Returned traces and CLI output can be saved explicitly by the operator. Ollama has its own process and lifecycle; this policy describes the application, not a claim about all retention inside that service.
+
+## Development artifacts
+
+The PUBLIC_VARIANTS reports intentionally retain self-authored public-corpus questions, answers and traces for before/after review. They contain no private final questions or user conversation history. They are versioned development evidence, separate from runtime memory.

@@ -28,3 +28,8 @@ Revisit full-document expansion if context exceeds 4096 tokens in any fixed eval
 ## Limitations
 
 A complete wrong document is still wrong evidence. The instruction detector is a heuristic. The caller timeout bounds waiting but does not forcibly cancel an in-flight provider request. Increased context may increase latency.
+
+
+## Extractive response refinement
+
+For answers without a review flag, return ranked exact source paragraphs rather than generated synthesis. Validate citations against the context actually shown to the model, preserve recognized comparisons and refuse output exceeding 8,000 characters. This prevents exposing conflicting generated prose as an unflagged answer, at the cost of fluent explanation and potentially incomplete coverage. Lexical ranking and source focusing remain heuristics; exact quotation does not prove entailment or completeness. The model-call and tool budgets are unchanged.

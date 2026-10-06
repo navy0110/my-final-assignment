@@ -121,6 +121,32 @@ def has_distinct_topic_clauses(question: str, documents: list[Document]) -> bool
     return len(winners) > 1
 
 
+def requested_quantity_is_supported(question: str, passages: list[str]) -> bool:
+    """Guard explicit English exact-count requests; this is not general entailment."""
+    request = re.search(
+        r"\b(?:exact|specific)\s+(?:number|amount|count)\s+of\s+(.+?)"
+        r"(?=\s+(?:is|are|must|should|can|may|does|do)\b|[?]|$)",
+        question,
+        flags=re.IGNORECASE,
+    )
+    if request is None:
+        return True
+    topic = content_tokens(request.group(1))
+    quantity = re.compile(
+        r"\b(?:\d+(?:\.\d+)?|zero|one|two|three|four|five|six|seven|eight|nine|ten|"
+        r"eleven|twelve|hundred|thousand)\b",
+        re.IGNORECASE,
+    )
+    for passage in passages:
+        sentences = re.split(r"(?<=[.!?])\s+", re.sub(r"\s+", " ", passage))
+        if any(
+            topic and topic <= content_tokens(sentence) and quantity.search(sentence)
+            for sentence in sentences
+        ):
+            return True
+    return False
+
+
 def supporting_excerpts(
     question: str, documents: list[Document], answer: ResearchAnswer
 ) -> list[str]:
@@ -388,6 +414,10 @@ class YourAgent:
                 passages = supporting_excerpts(question, evidence, result.answer)
                 if not passages:
                     return flagged_result(result.trace, "No relevant cited source passage.")
+                if not requested_quantity_is_supported(question, passages):
+                    return flagged_result(
+                        result.trace, "Requested quantitative fact absent from cited passages."
+                    )
                 combined = "Relevant source passages:\n\n" + "\n\n".join(passages)
                 if len(combined) > MAX_ANSWER_CHARS:
                     return flagged_result(result.trace, "Source excerpts exceed character budget.")

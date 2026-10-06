@@ -1,0 +1,18 @@
+{
+  "scope": "Recorded baseline CLI outcomes only; original answer text was overwritten by the rerun and is not archived here.",
+  "model": "ollama:qwen2.5:3b-instruct",
+  "results": [
+    {
+      "question": "What exact number of tool calls is mandatory for every production agent?",
+      "passed": false
+    },
+    {
+      "question": "Who originally coined prompt injection, and in which year?",
+      "passed": true
+    },
+    {
+      "question": "What is the CVE identifier of the malicious OpenAPI attack in these documents?",
+      "passed": true
+    }
+  ]
+}

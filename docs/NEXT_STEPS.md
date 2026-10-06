@@ -34,3 +34,6 @@ Latest official result: PR #755, commit 7386bc879e2247587c9bbb6b3ef43a587750d9bd
 
 
 Latest official result: PR #756, commit cca6296c86897c951598e0ade84b3a753bae0bad, 13/15 (87%), critical gate failed, no certificate. Current branch codex/preserve-topic-clauses repairs a public secondary-source omission. All 47 offline tests and the live public topic-coverage case passed; complete public practice passed 10/10.
+
+
+Latest official result: PR #757, commit 546b388db837957edf279ea3e931e8f58c4cd300, 13/15 (87%), critical gate failed, no certificate. Current branch codex/unsupported-topic-probes fixes an observed unsupported universal-count response. Baseline public probes: 2/3 refusals; 49 offline checks and lint passed after the fix, live public probes passed 3/3 and complete public practice passed 10/10. Public rubric feedback was requested from the learner; no private exam data requested.

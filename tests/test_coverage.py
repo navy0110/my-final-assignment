@@ -89,3 +89,19 @@ def test_conjoined_synthetic_topics_remain_unflagged_with_both_citations():
     assert not answer.needs_human_review
     assert set(answer.citations) == {"limits", "audit"}
     assert all(paragraph in answer.answer for paragraph in paragraphs)
+
+
+def test_exact_quantity_absent_from_cited_source_is_refused():
+    agent = YourAgent(client=model_reply("agent-loops"))
+    answer = agent("What exact number of tool calls is mandatory for every production agent?")
+    assert answer.needs_human_review and answer.confidence == 0.0
+    assert answer.citations == ()
+
+
+def test_documented_exact_quantity_is_not_rejected():
+    agent = YourAgent(client=model_reply("limits"))
+    source = "Storage limits permit three reads before the task must stop safely."
+    agent.documents = [Document("limits", "Storage Limits", source, "a.md", ())]
+    answer = agent("What exact number of reads is allowed?")
+    assert not answer.needs_human_review and answer.citations == ("limits",)
+    assert source in answer.answer

@@ -1,0 +1,83 @@
+{
+  "scope": "Self-authored public-corpus questions; requested facts are absent from the six documents.",
+  "results": [
+    {
+      "question": "What exact number of tool calls is mandatory for every production agent?",
+      "passed": true,
+      "answer": "I don't know based on the provided corpus.",
+      "citations": [],
+      "confidence": 0.0,
+      "needs_human_review": true,
+      "trace": [
+        {
+          "kind": "retrieve",
+          "detail": "top_k=3 -> [('agent-loops', 1), ('mcp-overview', 1), ('agent-loops', 2)]"
+        },
+        {
+          "kind": "llm_call",
+          "detail": "attempt 1: 302 chars"
+        },
+        {
+          "kind": "decision",
+          "detail": "answered with citations ['agent-loops']"
+        },
+        {
+          "kind": "decision",
+          "detail": "Requested quantitative fact absent from cited passages."
+        }
+      ]
+    },
+    {
+      "question": "Who originally coined prompt injection, and in which year?",
+      "passed": true,
+      "answer": "I don't know based on the provided corpus.",
+      "citations": [],
+      "confidence": 0.0,
+      "needs_human_review": true,
+      "trace": [
+        {
+          "kind": "retrieve",
+          "detail": "top_k=3 -> [('prompt-injection', 0), ('prompt-injection', 1), ('prompt-injection', 2)]"
+        },
+        {
+          "kind": "llm_call",
+          "detail": "attempt 1: 268 chars"
+        },
+        {
+          "kind": "decision",
+          "detail": "answered with citations []"
+        },
+        {
+          "kind": "decision",
+          "detail": "Uncited answer or refusal normalized; citations cleared."
+        }
+      ]
+    },
+    {
+      "question": "What is the CVE identifier of the malicious OpenAPI attack in these documents?",
+      "passed": true,
+      "answer": "I don't know based on the provided corpus.",
+      "citations": [],
+      "confidence": 0.0,
+      "needs_human_review": true,
+      "trace": [
+        {
+          "kind": "retrieve",
+          "detail": "top_k=3 -> [('prompt-injection', 1), ('agent-loops', 0), ('mcp-overview', 2)]"
+        },
+        {
+          "kind": "llm_call",
+          "detail": "attempt 1: 182 chars"
+        },
+        {
+          "kind": "decision",
+          "detail": "answered with citations []"
+        },
+        {
+          "kind": "decision",
+          "detail": "Uncited answer or refusal normalized; citations cleared."
+        }
+      ]
+    }
+  ]
+}

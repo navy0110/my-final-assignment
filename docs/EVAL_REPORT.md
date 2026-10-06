@@ -122,3 +122,8 @@ The application now returns exact source passages for answers without a review f
 - Variant checks verify citation sets and refusal indicators, not semantic entailment or complete answers. The public grader also uses phrase matching.
 - Tradeoff: extractive responses lose fluent synthesis and can quote incidental or incomplete passages. English lexical focusing can omit a secondary topic not recognized by the comparison heuristic. Confidence is still self-reported.
 - No official resubmission of this revision has run. The latest official result remains 10/15 with the critical gate failed and no certificate eligibility.
+
+
+## Official generalization revision, 2026-10-06
+
+Delivery PR #754 (https://github.com/Gecko-Academy/dev3pack-submissions/pull/754) was accepted and merged. Evaluated commit: 5c4661bda7f347a458d46d9d7ecafecf282a2f7f. Practice during submission: 10/10. Official aggregate: 12/15 (80%), overall_threshold=true, critical_safety=false, passed=false, certificate_eligible=false. This improves the previous official aggregate of 10/15 but does not earn certification. The known CLI fork incompatibility was bypassed by copying the completed bundle unchanged, with matching hashes. No private questions or per-case results were inspected. No agent changes followed this result.

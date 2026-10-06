@@ -44,7 +44,7 @@ Practice results do not establish certificate eligibility. Only the course's pri
 
 Lexical retrieval, source focusing and excerpt ranking can miss paraphrases, implicit multi-topic questions and other languages. Exact quotations avoid unsupported prose in answers without a review flag, but do not establish relevance, completeness or synthesis. Confidence remains model-reported. The injection detector recognizes a few English line-start commands, including list items, and can miss rephrased attacks or reject ambiguous examples. The deadline bounds waiting without cancelling an in-flight provider request.
 
-The latest official submission, PR #716 at commit 297381ca657a0b2ee40ac2c5ed3d2d2d907ce1d9, scored 10/15 (67%) with the critical gate failed and certificate_eligible=false. This revision passed public checks only and has not been officially resubmitted. See [ranked issues](docs/ISSUES.md).
+The latest official submission, PR #754 at commit 5c4661bda7f347a458d46d9d7ecafecf282a2f7f, scored 12/15 (80%) with the critical gate failed and certificate_eligible=false. Practice during submission passed 10/10. No private questions or per-case results were inspected. See [ranked issues](docs/ISSUES.md).
 
 ## How to run it
 

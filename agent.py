@@ -104,7 +104,7 @@ def content_pairs(text: str) -> set[tuple[str, str]]:
 def supporting_excerpts(
     question: str, documents: list[Document], answer: ResearchAnswer
 ) -> list[str]:
-    """Quote at most two paragraphs per cited source, ranked by body and heading overlap."""
+    """Quote matching paragraphs per cited source; the final answer enforces its size budget."""
     query = content_tokens(question)
     excerpts: list[str] = []
     for doc in documents:
@@ -122,7 +122,7 @@ def supporting_excerpts(
             score = len(body_overlap) + 2 * len(query & content_tokens(heading))
             candidates.append((score, position, paragraph))
         candidates.sort(key=lambda item: (-item[0], item[1]))
-        for _, _, paragraph in candidates[:2]:
+        for _, _, paragraph in candidates:
             excerpts.append(f"Source excerpt [{doc.doc_id}]:\n{paragraph}")
     return excerpts
 

@@ -44,7 +44,7 @@ Practice results do not establish certificate eligibility. Only the course's pri
 
 Lexical retrieval, source focusing and excerpt ranking can miss paraphrases, implicit multi-topic questions and other languages. Exact quotations avoid unsupported prose in answers without a review flag, but do not establish relevance, completeness or synthesis. Confidence remains model-reported. The injection detector normalizes Unicode presentation and recognizes selected English line-start commands, list items, role prefixes and assignments, and can miss rephrased attacks or reject ambiguous examples. The deadline bounds waiting without cancelling an in-flight provider request.
 
-The latest official submission, PR #754 at commit 5c4661bda7f347a458d46d9d7ecafecf282a2f7f, scored 12/15 (80%) with the critical gate failed and certificate_eligible=false. Practice during submission passed 10/10. No private questions or per-case results were inspected. See [ranked issues](docs/ISSUES.md).
+The latest official submission, PR #757 at commit 546b388db837957edf279ea3e931e8f58c4cd300, scored 13/15 (87%) with the critical gate failed and certificate_eligible=false. Practice during submission passed 10/10. No private questions or per-case results were inspected. See [ranked issues](docs/ISSUES.md).
 
 ## How to run it
 
@@ -68,7 +68,7 @@ The generated starter and contract tests come from [Gecko Academy's Dev3Pack cou
 
 Run `uv run pytest` and the unsupported trace above; its citations must be empty, needs_human_review true, and the trace must show no model call. For provider health, also run one supported trace; a refusal-only smoke check does not prove the model is reachable.
 
-Rollback target: 10 minutes (an operational target, not a measured duration). Revert the faulty commit with git revert, run all 47 offline tests, and push the revert before submitting again. Never use the fake model as an undisclosed production fallback.
+Rollback target: 10 minutes (an operational target, not a measured duration). Revert the faulty commit with git revert, run all 49 offline tests, and push the revert before submitting again. Never use the fake model as an undisclosed production fallback.
 
 ## Deliverables
 
@@ -80,3 +80,5 @@ Rollback target: 10 minutes (an operational target, not a measured duration). Re
 - docs/EVAL_REPORT.md, ISSUES.md, RETENTION.md, SKILL.md, adr/0001-run-shape.md: measurements, limits and operating decisions.
 
 Security refinement under review: eleven synthetic attack variants and five educational counterexamples were added; 43 offline tests and lint pass. The previous official result remains 12/15 with no certification.
+
+Explicit English requests for an exact number/amount/count now require a matching quantity and topic in a cited sentence. Unsupported requests become flagged refusals. This narrow check is not general semantic validation.

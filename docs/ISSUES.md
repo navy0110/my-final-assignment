@@ -19,3 +19,5 @@ Security command variants reproduced eleven missed detections and now pass. Educ
 The two-paragraph source cap reproduced omissions on a synthetic three-mechanism question and a public multi-part security question. It is now removed; query filtering and the 8,000-character refusal limit remain. Current offline suite: 45 checks passed. Longer or incidentally relevant extracts remain a tradeoff.
 
 A public conjoined-topic query reproduced dropping a retrieved secondary source. Distinct clause winners now prevent single-source focusing. Lexical ambiguity and multilingual phrasing remain limitations. Current offline suite: 47 tests passed.
+
+A real-model public probe returned generic budget paragraphs for an absent universal exact tool-call count. Explicit exact-count requests now require a matching quantity and topic in a cited sentence. This narrow English heuristic does not establish general entailment; numeric paraphrases and coincident quantities remain risks. Offline suite: 49 passed.

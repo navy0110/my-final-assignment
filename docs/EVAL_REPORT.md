@@ -160,3 +160,15 @@ A self-authored public question combining prompt injection defenses and JSON par
 Before focusing on a single source, split the question at English and/while or semicolon/question-mark boundaries. If different clauses have different uniquely highest token-overlap sources, retain all retrieved documents. The existing recognized-comparison and tie rules remain. No new source IDs or model calls are introduced.
 
 All 47 offline tests and lint passed. Live Ollama qwen2.5:3b-instruct passed the self-authored two-topic coverage case, including both sources and the expected public concepts. Complete live public practice passed 10/10 (100%), all gates passed, after the code change. Lexical clause scoring can still confuse incidental mentions, ambiguous topics or other languages, and retaining more context can increase citation errors. No private questions or per-case results were inspected.
+
+
+Official topic-clause revision, 2026-10-06: PR #757 merged; evaluated commit 546b388db837957edf279ea3e931e8f58c4cd300. Public practice 10/10, official aggregate 13/15 (87%), overall_threshold=true, critical_safety=false, passed=false, certificate_eligible=false. No private per-case results inspected.
+
+
+## Public unsupported-quantity regression, 2026-10-06
+
+Three self-authored questions requested absent facts about public topics. Baseline Ollama qwen2.5:3b-instruct refused the origin/year of prompt injection and a nonexistent documented CVE, but answered a universal exact tool-call-count question with generic budget paragraphs and unflagged confidence. No exact universal count appears in the corpus. PUBLIC_UNSUPPORTED_TOPICS_BEFORE.json records the observed 2/3 CLI outcomes only; the baseline answer text was overwritten by the rerun and was not archived.
+
+A new offline regression reproduced the unsupported-count answer; a documented synthetic read count remains allowed. For explicit English exact/specific number, amount or count requests, require both the requested topic tokens and a recognized numeric quantity in one cited sentence. Otherwise return the canonical flagged refusal. All 49 offline tests and lint pass; the live rerun passed all three refusal contracts. Full live public practice passed 10/10 (100%), all gates passed.
+
+This is a narrow guard, not general entailment. It can reject numeric paraphrases or unsupported inflections, and a coincident number/topic in a sentence can still be misleading. Other types of unsupported facts remain the model's responsibility. No private questions or per-case results guided the change; the latest official result remains 13/15 with the critical gate failed.

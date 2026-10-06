@@ -222,3 +222,5 @@ Apply the same cited-passage selection, quantitative support check and size budg
 All 57 offline tests and lint passed. Live absent-fact probes and full public practice are pending. Lexical paragraph relevance is still not semantic entailment; this change does not resolve that broader limitation. Latest official score remains 13/15 with critical_safety=false, no certificate. No private questions or per-case results informed the change.
 
 Final live verification: all three public absent-fact probes passed; complete public practice 10/10, all gates passed, on Ollama qwen2.5:3b-instruct. Offline suite 57 passed and lint passed.
+
+Official reviewed-answer revision, 2026-10-06: PR #766 accepted and merged. Evaluated commit 4045566b3b4942f656b6243da54e506da3374dd7; mandatory public practice 10/10; official aggregate 13/15 (87%), overall_threshold=true, critical_safety=false, passed=false, certificate_eligible=false. The reproduced reviewed-answer bypass is fixed, but official aggregate unchanged. No private questions or per-case results inspected. Public instructor feedback is needed to narrow the remaining issue without guessing private cases.

@@ -101,6 +101,26 @@ def content_pairs(text: str) -> set[tuple[str, str]]:
     }
 
 
+def has_distinct_topic_clauses(question: str, documents: list[Document]) -> bool:
+    """Keep sources when separate query clauses have different unique lexical winners."""
+    clauses = re.split(r"\band\b|\bwhile\b|[;?]", question, flags=re.IGNORECASE)
+    winners: set[str] = set()
+    for clause in clauses:
+        tokens = content_tokens(clause)
+        if not tokens:
+            continue
+        scores = sorted(
+            (
+                (len(tokens & content_tokens(doc.title + " " + doc.text)), doc.doc_id)
+                for doc in documents
+            ),
+            reverse=True,
+        )
+        if scores and scores[0][0] > 0 and (len(scores) == 1 or scores[0][0] > scores[1][0]):
+            winners.add(scores[0][1])
+    return len(winners) > 1
+
+
 def supporting_excerpts(
     question: str, documents: list[Document], answer: ResearchAnswer
 ) -> list[str]:
@@ -188,6 +208,7 @@ class EvidenceClient:
         scored.sort(key=lambda item: -item[0])
         if (
             not MULTI_TOPIC.search(question)
+            and not has_distinct_topic_clauses(question, documents)
             and not any(contains_direct_instruction(doc.text) for doc in documents)
             and scored
             and scored[0][0] > 0

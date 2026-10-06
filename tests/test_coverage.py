@@ -50,3 +50,42 @@ def test_public_security_answer_covers_entry_defenses_and_mindset():
     assert not answer.needs_human_review
     for concept in ("OpenAPI", "**Mark boundaries**", "**Test it**", "untrusted input"):
         assert concept in answer.answer
+
+
+def test_conjoined_public_topics_both_reach_model_context():
+    from bootcamp_agent.retrieval import retrieve
+
+    from agent import EvidenceClient
+
+    agent = YourAgent(client=model_reply("prompt-injection"))
+    question = "Explain prompt injection defenses and JSON parsing failure handling."
+    ids = {item.chunk.doc_id for item in retrieve(question, agent.documents, top_k=3)}
+    sources = [doc for doc in agent.documents if doc.doc_id in ids]
+    context = EvidenceClient(agent.client, question, sources)
+    assert {"prompt-injection", "structured-outputs"} <= context.source_ids
+
+
+def test_conjoined_synthetic_topics_remain_unflagged_with_both_citations():
+    paragraphs = (
+        "Storage limits permit three reads and no writes before the task stops.",
+        "Audit validation verifies recorded events before reporting them as trusted.",
+    )
+    model = FakeLLM(
+        default=json.dumps(
+            dict(
+                answer="Both mechanisms apply.",
+                citations=["limits", "audit"],
+                confidence=0.9,
+                needs_human_review=False,
+            )
+        )
+    )
+    agent = YourAgent(client=model)
+    agent.documents = [
+        Document("limits", "Storage Limits", paragraphs[0], "a.md", ()),
+        Document("audit", "Audit Validation", paragraphs[1], "b.md", ()),
+    ]
+    answer = agent("Explain storage limits and audit validation.")
+    assert not answer.needs_human_review
+    assert set(answer.citations) == {"limits", "audit"}
+    assert all(paragraph in answer.answer for paragraph in paragraphs)

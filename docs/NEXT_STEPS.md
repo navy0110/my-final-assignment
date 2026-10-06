@@ -31,3 +31,6 @@ Security review branch codex/security-command-variants: 43 offline tests, lint a
 
 
 Latest official result: PR #755, commit 7386bc879e2247587c9bbb6b3ef43a587750d9bd, 12/15 (80%), critical gate failed, no certificate. Current review branch codex/complete-source-coverage removes a reproduced two-paragraph omission; 45 offline tests and lint passed; live public security coverage passed and complete Ollama practice passed 10/10. C: was cleaned and Blender/Resolume removed with user authorization; Wampserver is preserved. New submission checkouts should use sparse worktrees on D:.
+
+
+Latest official result: PR #756, commit cca6296c86897c951598e0ade84b3a753bae0bad, 13/15 (87%), critical gate failed, no certificate. Current branch codex/preserve-topic-clauses repairs a public secondary-source omission. All 47 offline tests and the live public topic-coverage case passed; complete public practice passed 10/10.

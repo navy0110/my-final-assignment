@@ -17,3 +17,5 @@ The 110-second waiting deadline does not cancel an in-flight provider request. A
 Security command variants reproduced eleven missed detections and now pass. Educational quotations remain allowed; quote-wrapped attacks and indirect or multilingual commands are not comprehensively detected. See EVAL_REPORT.md for measured scope.
 
 The two-paragraph source cap reproduced omissions on a synthetic three-mechanism question and a public multi-part security question. It is now removed; query filtering and the 8,000-character refusal limit remain. Current offline suite: 45 checks passed. Longer or incidentally relevant extracts remain a tradeoff.
+
+A public conjoined-topic query reproduced dropping a retrieved secondary source. Distinct clause winners now prevent single-source focusing. Lexical ambiguity and multilingual phrasing remain limitations. Current offline suite: 47 tests passed.

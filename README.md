@@ -18,7 +18,7 @@ Source passages are exact quotations. Their ranking does not prove that they ful
 
 ## Architecture
 
-A bounded chain retrieves top_k=3 chunks and expands their selected source documents. For single-topic English questions, a uniquely stronger adjacent-word match focuses the context on one document; recognized comparisons and ties retain all retrieved sources. One model supplies strict ResearchAnswer JSON, with at most one corrective retry under a shared 110-second waiting deadline. Citations must belong to both retrieval and the context actually provided to the model. Removing an unshown citation flags human review.
+A bounded chain retrieves top_k=3 chunks and expands their selected source documents. For single-topic English questions, a uniquely stronger adjacent-word match focuses the context on one document; recognized comparisons, ties and clauses with distinct lexical source winners retain all retrieved sources. One model supplies strict ResearchAnswer JSON, with at most one corrective retry under a shared 110-second waiting deadline. Citations must belong to both retrieval and the context actually provided to the model. Removing an unshown citation flags human review.
 
 For answers without a review flag, the application replaces generated prose with all matching exact paragraphs per cited document, ranked by question overlap with body text and headings. It refuses when there are no relevant passages or the answer exceeds 8,000 characters. Uncited answers and detected refusals become canonical refusals with no citations and confidence 0.0. Direct instructions in any expanded retrieved evidence trigger rejection. Empty retrieval spends zero model calls; provider failures and timeouts return typed refusals. Flagged answers with valid citations can retain model prose for human review.
 
@@ -68,7 +68,7 @@ The generated starter and contract tests come from [Gecko Academy's Dev3Pack cou
 
 Run `uv run pytest` and the unsupported trace above; its citations must be empty, needs_human_review true, and the trace must show no model call. For provider health, also run one supported trace; a refusal-only smoke check does not prove the model is reachable.
 
-Rollback target: 10 minutes (an operational target, not a measured duration). Revert the faulty commit with git revert, run all 45 offline tests, and push the revert before submitting again. Never use the fake model as an undisclosed production fallback.
+Rollback target: 10 minutes (an operational target, not a measured duration). Revert the faulty commit with git revert, run all 47 offline tests, and push the revert before submitting again. Never use the fake model as an undisclosed production fallback.
 
 ## Deliverables
 

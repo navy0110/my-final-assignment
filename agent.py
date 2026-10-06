@@ -466,32 +466,31 @@ class YourAgent:
                 )
             if len(result.answer.answer) > MAX_ANSWER_CHARS:
                 return flagged_result(result.trace, "Model answer exceeds character budget.")
-            if not result.answer.needs_human_review:
-                passages = supporting_excerpts(question, evidence, result.answer)
-                if not passages:
-                    return flagged_result(result.trace, "No relevant cited source passage.")
-                if not requested_quantity_is_supported(question, passages):
-                    return flagged_result(
-                        result.trace, "Requested quantitative fact absent from cited passages."
-                    )
-                combined = "Relevant source passages:\n\n" + "\n\n".join(passages)
-                if len(combined) > MAX_ANSWER_CHARS:
-                    return flagged_result(result.trace, "Source excerpts exceed character budget.")
-                return AgentResult(
-                    answer=ResearchAnswer(
-                        answer=combined,
-                        citations=result.answer.citations,
-                        confidence=result.answer.confidence,
-                        needs_human_review=False,
-                    ),
-                    trace=result.trace
-                    + (
-                        TraceEvent(
-                            "decision", "Returned cited source passages; model prose omitted."
-                        ),
-                    ),
+            passages = supporting_excerpts(question, evidence, result.answer)
+            if not passages:
+                return flagged_result(result.trace, "No relevant cited source passage.")
+            if not requested_quantity_is_supported(question, passages):
+                return flagged_result(
+                    result.trace, "Requested quantitative fact absent from cited passages."
                 )
-            return result
+            combined = "Relevant source passages:\n\n" + "\n\n".join(passages)
+            if len(combined) > MAX_ANSWER_CHARS:
+                return flagged_result(result.trace, "Source excerpts exceed character budget.")
+            return AgentResult(
+                answer=ResearchAnswer(
+                    answer=combined,
+                    citations=result.answer.citations,
+                    confidence=result.answer.confidence,
+                    needs_human_review=result.answer.needs_human_review,
+                ),
+                trace=result.trace
+                + (
+                    TraceEvent(
+                        "decision", "Returned cited source passages; model prose omitted."
+                    ),
+                ),
+            )
+
 
         except TimeoutError:
             message = "El modelo no respondió dentro del tiempo permitido."

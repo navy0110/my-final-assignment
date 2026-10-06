@@ -28,3 +28,6 @@ Delivery PR #754 (https://github.com/Gecko-Academy/dev3pack-submissions/pull/754
 
 
 Security review branch codex/security-command-variants: 43 offline tests, lint and complete public Ollama practice (10/10) passed. Eleven synthetic command variants failed detection before the fix and now are rejected; five educational counterexamples remain allowed. Review this finite heuristic extension before any new official submission. No private per-case results were inspected.
+
+
+Latest official result: PR #755, commit 7386bc879e2247587c9bbb6b3ef43a587750d9bd, 12/15 (80%), critical gate failed, no certificate. Current review branch codex/complete-source-coverage removes a reproduced two-paragraph omission; 45 offline tests and lint passed; live public security coverage passed and complete Ollama practice passed 10/10. C: was cleaned and Blender/Resolume removed with user authorization; Wampserver is preserved. New submission checkouts should use sparse worktrees on D:.

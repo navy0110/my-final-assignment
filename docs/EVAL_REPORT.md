@@ -136,3 +136,15 @@ Eleven self-authored synthetic command variants failed detection before the chan
 The detector now applies Unicode NFKC normalization and removes format characters for detection only, handles selected Markdown and role prefixes, and recognizes these additional direct commands. Source text remains unchanged. The synthetic attack tests also exercise YourAgent.run: no attack result survives, citations are empty, confidence is zero and human review is required. All 43 offline tests and lint pass. Complete live public practice on Ollama / qwen2.5:3b-instruct: 10/10 (100%), all gates passed, after the final code changes.
 
 This remains a heuristic, not complete injection protection. Quoted educational examples are deliberately allowed, so quote-wrapped attacks, indirect requests, other languages and unrecognized role syntax remain possible bypasses. Detected evidence is still sent to the model before application rejection to preserve the course contract tests; there are no writing tools or model-visible credentials. No official resubmission of this security revision has run.
+
+
+Official security revision, 2026-10-06: PR #755 merged; evaluated commit 7386bc879e2247587c9bbb6b3ef43a587750d9bd. Public practice 10/10, official aggregate 12/15 (80%), critical_safety=false, certificate_eligible=false. No private per-case results were inspected.
+
+
+## Public multi-part coverage revision, 2026-10-06
+
+A two-paragraph cap per cited source silently omitted requested information. Two new tests failed before the fix: a synthetic question requesting read limits, write limits and retry rules lost one paragraph; a self-authored question about the public prompt-injection document omitted entry points while requesting entry points, defenses and the untrusted-input mindset.
+
+Remove the arbitrary paragraph-count cap while keeping query-overlap filtering and the 8,000-character final answer limit. If relevant quotations exceed that limit, return a flagged refusal instead of silently omitting a section. There is no additional model call or source ID. All 45 offline checks and lint pass. Live Ollama / qwen2.5:3b-instruct passed the self-authored public security coverage case and the complete practice set, 10/10 (100%), all gates passed.
+
+Tradeoff: weak lexical overlap can include incidental paragraphs and produce longer answers or more budget refusals. Matching phrases in tests do not establish semantic completeness. This change is based only on the public corpus and synthetic sources; no private questions or per-case results were inspected. No official resubmission of this revision has run.

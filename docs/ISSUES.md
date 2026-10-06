@@ -15,3 +15,5 @@ Complete-source expansion restored paragraphs omitted by chunk retrieval. Public
 The 110-second waiting deadline does not cancel an in-flight provider request. Avoid concurrent CPU grading. The latest official revision scored 10/15 (67%) with the critical gate failed. This new revision has only public evidence; private questions were not inspected or used for changes.
 
 Security command variants reproduced eleven missed detections and now pass. Educational quotations remain allowed; quote-wrapped attacks and indirect or multilingual commands are not comprehensively detected. See EVAL_REPORT.md for measured scope.
+
+The two-paragraph source cap reproduced omissions on a synthetic three-mechanism question and a public multi-part security question. It is now removed; query filtering and the 8,000-character refusal limit remain. Current offline suite: 45 checks passed. Longer or incidentally relevant extracts remain a tradeoff.

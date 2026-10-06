@@ -46,3 +46,11 @@ Expanded-query live probe initially found the correct evidence but included agen
 
 
 Ready revision: 53 offline tests and lint passed; live public inflection query passed, absent-fact probes 3/3, complete practice 10/10. Next: publish and integrate the verified revision, then submit officially. Current official score remains 12/15, no certificate.
+
+
+Latest official result: PR #764, evaluated commit 7af84dcb793d47d15fc094b7d7c4383e5db543ab, 13/15 (87%), critical gate failed, no certificate. Current branch codex/semantic-excerpt-coverage repairs a reproduced public synonym-based omission using draft term-pair hints to select exact source quotations. Offline suite 54 and lint passed; live checks pending.
+
+
+The safeguard live probe initially restored defenses but included an incidental agent-loops citation. A public source-focus regression reproduced plural phrase mismatch; normalized pair scoring fixes it. Offline suite 55 and lint passed, final live rerun pending.
+
+Verified current revision: 55 offline tests, lint, live safeguard paraphrase, absent-fact probes 3/3 and complete public practice 10/10 passed. Publish and merge this revision, then submit officially and inspect aggregate results only. Latest official result remains PR #764: 13/15, critical_safety=false, certificate_eligible=false.

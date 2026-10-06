@@ -191,3 +191,22 @@ The first expanded-query live probe retrieved the correct document and quoted re
 Final offline suite: 53 tests passed; lint passed. The live rerun is pending. This check remains lexical: quantities can be coincidental and paraphrases can be missed. No private questions or per-case results were inspected.
 
 Final resumed live checks: inflection-retrieval case passed with only structured-outputs; absent-fact probes passed 3/3; complete public practice passed 10/10 (100%), all gates passed on Ollama qwen2.5:3b-instruct. All checks followed the final source-focusing change. No official evaluation of this revision has run yet.
+
+
+Official inflection revision, 2026-10-06: PR #764 merged, evaluated commit 7af84dcb793d47d15fc094b7d7c4383e5db543ab. Practice 10/10; official aggregate 13/15 (87%), overall_threshold=true, critical_safety=false, passed=false, certificate_eligible=false. No private per-case results inspected.
+
+
+## Public safeguard-paraphrase excerpt coverage, 2026-10-06
+
+A self-authored question asks which safeguards reduce risks from hostile OpenAPI descriptions. The correct cited source was retrieved, and a scripted model named mark boundaries and constrain output, but query-only paragraph filtering omitted the defenses paragraph. The regression failed before the fix.
+
+Use the validated model draft only as a selection hint: a cited paragraph with at least two adjacent content-term pairs matching the draft can be included even without query-word overlap. Continue returning exact source quotations, never generated prose, with the same citation allowlist and 8,000-character guard. No additional model call or source ID is added.
+
+All 54 offline tests and lint passed, including conflicting-generated-prose and irrelevant-history checks. Live paraphrase, absent-fact probes and full public practice are pending. Draft hints can select incidental paragraphs or increase budget refusals; exact quotations still do not prove relevance or complete entailment. No private questions or per-case results were inspected.
+
+
+The first real-model safeguard probe restored the defense paragraph but included agent-loops as an incidental citation, so its strict source-set check failed. A second regression reproduced the context issue: OpenAPI descriptions in the question did not match OpenAPI description in the source's adjacent-term score. Normalize simple -ies/-s forms consistently for term-pair comparison in both question and document. The new focus test failed before this fix and now passes.
+
+Final offline suite: 55 passed; lint passed. Final live rerun is pending. Both draft-hint coverage and phrase normalization are public-regression-driven changes, not private-case adaptations.
+
+Final live verification: safeguard paraphrase passed with only prompt-injection cited; absent-fact probes passed 3/3; complete public practice passed 10/10, all gates passed, on Ollama qwen2.5:3b-instruct. All 55 offline tests and lint passed. Certification remains pending official evaluation.

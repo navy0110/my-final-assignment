@@ -17,7 +17,7 @@ Use for developer questions supported by data/corpus. Do not use for current pri
 4. Inspect expanded evidence for direct instructions, normalizing Unicode presentation and selected formatting for detection only. Preserve source text and distinguish educational quotations. Keep an application guard independent of model obedience.
 5. Request strict ResearchAnswer JSON; allow one corrective parsing retry within the shared deadline.
 6. Check citations against retrieved document IDs and the actual context provided to the model. Reject instruction-influenced results and return typed refusals for timeouts and provider failures.
-7. Normalize refusals and uncited answers. For answers without a review flag, replace generated prose with all matching relevant exact paragraphs per cited source. Refuse missing passages or output over 8,000 characters. Keep traces readable and measure with the public practice grader.
+7. Normalize refusals and uncited answers. For answers without a review flag, replace generated prose with all matching exact paragraphs per cited source, using query overlap or at least two adjacent content-term pairs from the draft as selection hints. Refuse missing passages or output over 8,000 characters. Keep traces readable and measure with the public practice grader.
 
 ## Output format (`output_format`)
 

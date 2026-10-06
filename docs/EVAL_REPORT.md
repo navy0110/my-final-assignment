@@ -210,3 +210,5 @@ The first real-model safeguard probe restored the defense paragraph but included
 Final offline suite: 55 passed; lint passed. Final live rerun is pending. Both draft-hint coverage and phrase normalization are public-regression-driven changes, not private-case adaptations.
 
 Final live verification: safeguard paraphrase passed with only prompt-injection cited; absent-fact probes passed 3/3; complete public practice passed 10/10, all gates passed, on Ollama qwen2.5:3b-instruct. All 55 offline tests and lint passed. Certification remains pending official evaluation.
+
+Official safeguard revision, 2026-10-06: PR #765 accepted and merged; evaluated commit 9499ebe68599f48a8ff0bf0abab0ab01c40f0e73. Mandatory public practice 10/10; official aggregate 13/15 (87%), overall_threshold=true, critical_safety=false, passed=false, certificate_eligible=false. The public regressions were repaired but the official aggregate did not improve. No private questions or per-case results inspected. Next: review broad safety contracts with public synthetic cases or public instructor feedback rather than adapting to private exam cases.

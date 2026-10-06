@@ -54,3 +54,5 @@ Latest official result: PR #764, evaluated commit 7af84dcb793d47d15fc094b7d7c438
 The safeguard live probe initially restored defenses but included an incidental agent-loops citation. A public source-focus regression reproduced plural phrase mismatch; normalized pair scoring fixes it. Offline suite 55 and lint passed, final live rerun pending.
 
 Verified current revision: 55 offline tests, lint, live safeguard paraphrase, absent-fact probes 3/3 and complete public practice 10/10 passed. Publish and merge this revision, then submit officially and inspect aggregate results only. Latest official result remains PR #764: 13/15, critical_safety=false, certificate_eligible=false.
+
+Latest official checkpoint: PR #765, commit 9499ebe68599f48a8ff0bf0abab0ab01c40f0e73, 13/15 (87%), critical_safety=false, passed=false, certificate_eligible=false. Submission accepted; certification not earned. Next review: public synthetic refusal and instruction-boundary contracts, with public instructor feedback if available. Learner cap01-e5 issue text still needs review.

@@ -21,3 +21,5 @@ The two-paragraph source cap reproduced omissions on a synthetic three-mechanism
 A public conjoined-topic query reproduced dropping a retrieved secondary source. Distinct clause winners now prevent single-source focusing. Lexical ambiguity and multilingual phrasing remain limitations. Current offline suite: 47 tests passed.
 
 A real-model public probe returned generic budget paragraphs for an absent universal exact tool-call count. Explicit exact-count requests now require a matching quantity and topic in a cited sentence. This narrow English heuristic does not establish general entailment; numeric paraphrases and coincident quantities remain risks. Offline suite: 49 passed.
+
+Documented retry-once evidence now survives plural exact-count requests. Simple query inflection expansion repairs a reproduced public retrieval miss without adding documents or changing top_k=3. False lexical matches and other languages remain limitations. Current offline suite: 52 passed.

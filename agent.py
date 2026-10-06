@@ -101,6 +101,19 @@ def content_pairs(text: str) -> set[tuple[str, str]]:
     }
 
 
+def retrieval_query(question: str) -> str:
+    """Expand simple English inflections while retaining every original query term."""
+    variants: set[str] = set()
+    for word in re.findall(r"[a-z]+", question.lower()):
+        if word in COMMON_WORDS:
+            continue
+        if len(word) > 4 and word.endswith("ies"):
+            variants.add(word[:-3] + "y")
+        elif len(word) > 3 and word.endswith("s") and not word.endswith("ss"):
+            variants.add(word[:-1])
+    return question + (" " + " ".join(sorted(variants)) if variants else "")
+
+
 def has_distinct_topic_clauses(question: str, documents: list[Document]) -> bool:
     """Keep sources when separate query clauses have different unique lexical winners."""
     clauses = re.split(r"\band\b|\bwhile\b|[;?]", question, flags=re.IGNORECASE)
@@ -131,10 +144,12 @@ def requested_quantity_is_supported(question: str, passages: list[str]) -> bool:
     )
     if request is None:
         return True
-    topic = content_tokens(request.group(1))
+    topic = content_tokens(
+        re.sub(r"\b([a-z]+)ies\b", r"\1y", request.group(1), flags=re.IGNORECASE)
+    )
     quantity = re.compile(
         r"\b(?:\d+(?:\.\d+)?|zero|one|two|three|four|five|six|seven|eight|nine|ten|"
-        r"eleven|twelve|hundred|thousand)\b",
+        r"eleven|twelve|hundred|thousand|once|twice)\b",
         re.IGNORECASE,
     )
     for passage in passages:
@@ -225,6 +240,17 @@ class EvidenceClient:
     def __init__(self, client: LLMClient, question: str, documents: list[Document]) -> None:
         self.client = client
         self.question = question
+        # Exact-count questions should not invite a generic budget as a citation.
+        if (
+            not MULTI_TOPIC.search(question)
+            and not has_distinct_topic_clauses(question, documents)
+            and not any(contains_direct_instruction(doc.text) for doc in documents)
+        ):
+            quantity_sources = [
+                doc for doc in documents if requested_quantity_is_supported(question, [doc.text])
+            ]
+            if quantity_sources:
+                documents = quantity_sources
         # Single-topic questions may have one source with a unique phrase match.
         # Ambiguous and comparative questions retain all retrieved sources.
         query_pairs = content_pairs(question)
@@ -335,7 +361,8 @@ class YourAgent:
 
     def run(self, question: str) -> AgentResult:
         try:
-            scored = retrieve(question, self.documents, top_k=3)
+            query = retrieval_query(question)
+            scored = retrieve(query, self.documents, top_k=3)
 
             retrieved_ids = {item.chunk.doc_id for item in scored}
             evidence = [doc for doc in self.documents if doc.doc_id in retrieved_ids]
@@ -344,12 +371,21 @@ class YourAgent:
             client = DeadlineClient(evidence_client, self.timeout_s)
 
             result = answer_question(
-                question,
+                query,
                 self.documents,
                 client,
                 max_tool_calls=3,
                 top_k=3,
             )
+
+            if query != question:
+                result = AgentResult(
+                    answer=result.answer,
+                    trace=(
+                        TraceEvent("retrieve", "Query expanded with English inflection variants."),
+                    )
+                    + result.trace,
+                )
 
             if suspicious:
                 return AgentResult(

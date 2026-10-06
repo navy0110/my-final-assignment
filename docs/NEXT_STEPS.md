@@ -37,3 +37,12 @@ Latest official result: PR #756, commit cca6296c86897c951598e0ade84b3a753bae0bad
 
 
 Latest official result: PR #757, commit 546b388db837957edf279ea3e931e8f58c4cd300, 13/15 (87%), critical gate failed, no certificate. Current branch codex/unsupported-topic-probes fixes an observed unsupported universal-count response. Baseline public probes: 2/3 refusals; 49 offline checks and lint passed after the fix, live public probes passed 3/3 and complete public practice passed 10/10. Public rubric feedback was requested from the learner; no private exam data requested.
+
+
+Resumed branch codex/documented-quantity-forms: 52 offline tests and lint passed. Repairs retry-once quantity recognition and a public raw-query source miss with simple English query expansion. Original question stays in model context, top_k=3 unchanged. Previous pending public report completed 10/10; final live checks pending. Latest official result remains PR #759 at 12/15, no certificate; best earlier result 13/15.
+
+
+Expanded-query live probe initially found the correct evidence but included agent-loops as an incidental citation. A reproduced source-context regression now passes after quantity-aware focusing. Final offline suite: 53 passed, lint passed, final live rerun pending.
+
+
+Ready revision: 53 offline tests and lint passed; live public inflection query passed, absent-fact probes 3/3, complete practice 10/10. Next: publish and integrate the verified revision, then submit officially. Current official score remains 12/15, no certificate.
